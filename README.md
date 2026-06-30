@@ -6,6 +6,9 @@ App para gestión de pozos en mina subterránea y superficie. Util para transmit
 ## 📄 README.md Versión en Español - Castellano (and in the English language below)
 
 ```markdown
+<p align="center">
+  <img src="assets/Logo UndSurf 1.png" alt="Logo Undsurf" width="200"/>
+</p>
 # Undsurf - Sistema de Gestión de Datos de Perforación Minera
 
 **Undsurf** es una aplicación integral de gestión operativa diseñada para agilizar el flujo de comunicación entre geólogos, perforistas e ingenieros de minas en minas subterráneas y a cielo abierto.
