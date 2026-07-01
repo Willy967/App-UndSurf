@@ -88,7 +88,105 @@ Los usuarios pueden localizar rápidamente pozos específicos usando la barra de
 ## 🗄️ Modelo de Datos Conceptual (Relaciones)
 
 A continuación se muestra el diagrama de relaciones conceptuales para las tablas principales de la base de datos y las integraciones CSV:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USUARIOS Y AUTENTICACIÓN                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────┐         ┌──────────────────┐         ┌─────────────────┐ │
+│  │   usuarios   │         │   roles_permisos │         │  auth_sessions  │ │
+│  ├──────────────┤         ├──────────────────┤         ├─────────────────┤ │
+│  │ id_usuario   │◄────────│ id_usuario (FK)  │         │ id_session      │ │
+│  │ username     │         │ id_rol (FK)      │         │ id_usuario (FK) │ │
+│  │ password_hash│         │ puede_editar     │         │ login_time      │ │
+│  │ email        │         │ puede_subir_arch │         │ logout_time     │ │
+│  │ rol          │         │ puede_ver_geotec │         │ ip_address      │ │
+│  │ biometrico   │         └──────────────────┘         │ device_info     │ │
+│  │ activo       │                                       └─────────────────┘ │
+│  └──────┬───────┘                                                           │
+│         │                                                                   │
+└─────────┼───────────────────────────────────────────────────────────────────┘
+          │
+          │ (1 a muchos)
+          │
+┌─────────┼───────────────────────────────────────────────────────────────────┐
+│         │                    POZOS Y DATOS PRINCIPALES                       │
+│         ▼                                                                   │
+│  ┌──────────────────┐                                                       │
+│  │      pozos       │  (Tabla principal - viene del CSV inicial)           │
+│  ├──────────────────┤                                                       │
+│  │ id_pozo (PK)     │                                                       │
+│  │ orden            │                                                       │
+│  │ rec_id           │                                                       │
+│  │ hole_id (UNIQUE) │  ◄── SOLO MAYÚSCULAS, ÚNICO, MÁX 3 EDICIONES        │
+│  │ este             │                                                       │
+│  │ norte            │                                                       │
+│  │ cota             │                                                       │
+│  │ length           │                                                       │
+│  │ target           │                                                       │
+│  │ az (azimuth)     │                                                       │
+│  │ dip              │                                                       │
+│  │ plataforma       │                                                       │
+│  │ estado           │  ('planificado', 'perforando', 'completado')         │
+│  │ id_perforista    │  (FK a usuarios)                                     │
+│  │ id_geologo       │  (FK a usuarios)                                     │
+│  │ id_geotecnico    │  (FK a usuarios)                                     │
+│  │ fecha_creacion   │                                                       │
+│  │ fecha_fin_perfor │                                                       │
+│  │ ediciones_hole_id│  (Contador: máximo 3)                                │
+│  └──────┬───────────┘                                                       │
+│         │                                                                   │
+│         ├────────────────────────────────────────────────────────────────┐  │
+│         │                    │                    │                      │  │
+│         ▼                    ▼                    ▼                      ▼  │
+│  ┌─────────────────┐  ┌──────────────┐  ┌──────────────────┐  ┌────────┐ │
+│  │ archivos_media  │  │ observaciones│  │  problemas_pozo  │  │ survey │ │
+│  ├─────────────────┤  ├──────────────┤  ├──────────────────┤  ├────────┤ │
+│  │ id_archivo (PK) │  │ id_obs (PK)  │  │ id_prob (PK)     │  │id_surv │ │
+│  │ id_pozo (FK)    │  │ id_pozo (FK) │  │ id_pozo (FK)     │  │(PK)    │ │
+│  │ tipo_archivo    │  │ id_usuario   │  │ id_usuario       │  │id_pozo │ │
+│  │ ruta_archivo    │  │ (FK)         │  │ (FK)             │  │(FK)    │ │
+│  │ descripcion     │  │ texto_obs    │  │ descripcion_prob │  │depth   │ │
+│  │ fecha_subida    │  │ fecha_hora   │  │ fecha_hora       │  │azimuth │ │
+│  │ subido_por (FK) │  │ tipo_obs     │  │ resuelto         │  │dip     │ │
+│  │ (geologo/perf)  │  │ ('planta',   │  │ fecha_resolucion │  │fecha   │ │
+│  └─────────────────┘  │  'seccion')  │  └──────────────────┘  │medicion│ │
+│                        └──────────────┘                         └────────┘ │
+│                                                                              │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
+│  │  datos_geotecnia │  │ datos_litologicos│  │ observaciones_geo│          │
+│  ├──────────────────┤  ├──────────────────┤  ├──────────────────┤          │
+│  │ id_geotec (PK)   │  │ id_lito (PK)     │  │ id_obs_geo (PK)  │          │
+│  │ id_pozo (FK)     │  │ id_pozo (FK)     │  │ id_pozo (FK)     │          │
+│  │ ruta_csv         │  │ ruta_csv         │  │ id_geotecnico(FK)│          │
+│  │ fecha_subida     │  │ fecha_subida     │  │ texto_obs        │          │
+│  │ subido_por (FK)  │  │ subido_por (FK)  │  │ nivel_riesgo     │          │
+│  │ (geologo)        │  │ (geologo)        │  │ ('bajo','medio', │          │
+│  │ opcional: TRUE   │  │ opcional: TRUE   │  │  'alto','critico')│          │
+│  └──────────────────┘  └──────────────────┘  │ color_alerta     │          │
+│                                               │ fecha_hora       │          │
+│                                               └──────────────────┘          │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
 
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         AUDITORÍA Y LOGS                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────────┐    ┌──────────────────────┐                       │
+│  │   logs_modificaciones│    │   logs_hole_id_changes│                      │
+│  ├──────────────────────┤    ├──────────────────────┤                       │
+│  │ id_log (PK)          │    │ id_log (PK)          │                       │
+│  │ id_usuario (FK)      │    │ id_usuario (FK)      │                       │
+│  │ id_pozo (FK)         │    │ id_pozo (FK)         │                       │
+│  │ tabla_afectada       │    │ hole_id_anterior     │                       │
+│  │ campo_modificado     │    │ hole_id_nuevo        │                       │
+│  │ valor_anterior       │    │ motivo_cambio        │                       │
+│  │ valor_nuevo          │    │ fecha_hora           │                       │
+│  │ fecha_hora           │    │ numero_edicion       │                       │
+│  │ ip_address           │    │ (1, 2 o 3)           │                       │
+│  └──────────────────────┘    └──────────────────────┘                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```mermaid
 erDiagram
     USERS ||--o{ DRILLING_DATA : gestiona
@@ -248,6 +346,105 @@ Users can quickly locate specific drill holes using the dedicated search bar, fi
 ## 🗄️ Conceptual Data Model (Relationships)
 
 Below is the conceptual relationship diagram for the core database tables and CSV integrations:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USUARIOS Y AUTENTICACIÓN                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────┐         ┌──────────────────┐         ┌─────────────────┐ │
+│  │   usuarios   │         │   roles_permisos │         │  auth_sessions  │ │
+│  ├──────────────┤         ├──────────────────┤         ├─────────────────┤ │
+│  │ id_usuario   │◄────────│ id_usuario (FK)  │         │ id_session      │ │
+│  │ username     │         │ id_rol (FK)      │         │ id_usuario (FK) │ │
+│  │ password_hash│         │ puede_editar     │         │ login_time      │ │
+│  │ email        │         │ puede_subir_arch │         │ logout_time     │ │
+│  │ rol          │         │ puede_ver_geotec │         │ ip_address      │ │
+│  │ biometrico   │         └──────────────────┘         │ device_info     │ │
+│  │ activo       │                                       └─────────────────┘ │
+│  └──────┬───────┘                                                           │
+│         │                                                                   │
+└─────────┼───────────────────────────────────────────────────────────────────┘
+          │
+          │ (1 a muchos)
+          │
+┌─────────┼───────────────────────────────────────────────────────────────────┐
+│         │                    POZOS Y DATOS PRINCIPALES                       │
+│         ▼                                                                   │
+│  ┌──────────────────┐                                                       │
+│  │      pozos       │  (Tabla principal - viene del CSV inicial)           │
+│  ├──────────────────┤                                                       │
+│  │ id_pozo (PK)     │                                                       │
+│  │ orden            │                                                       │
+│  │ rec_id           │                                                       │
+│  │ hole_id (UNIQUE) │  ◄── SOLO MAYÚSCULAS, ÚNICO, MÁX 3 EDICIONES        │
+│  │ este             │                                                       │
+│  │ norte            │                                                       │
+│  │ cota             │                                                       │
+│  │ length           │                                                       │
+│  │ target           │                                                       │
+│  │ az (azimuth)     │                                                       │
+│  │ dip              │                                                       │
+│  │ plataforma       │                                                       │
+│  │ estado           │  ('planificado', 'perforando', 'completado')         │
+│  │ id_perforista    │  (FK a usuarios)                                     │
+│  │ id_geologo       │  (FK a usuarios)                                     │
+│  │ id_geotecnico    │  (FK a usuarios)                                     │
+│  │ fecha_creacion   │                                                       │
+│  │ fecha_fin_perfor │                                                       │
+│  │ ediciones_hole_id│  (Contador: máximo 3)                                │
+│  └──────┬───────────┘                                                       │
+│         │                                                                   │
+│         ├────────────────────────────────────────────────────────────────┐  │
+│         │                    │                    │                      │  │
+│         ▼                    ▼                    ▼                      ▼  │
+│  ┌─────────────────┐  ┌──────────────┐  ┌──────────────────┐  ┌────────┐ │
+│  │ archivos_media  │  │ observaciones│  │  problemas_pozo  │  │ survey │ │
+│  ├─────────────────┤  ├──────────────┤  ├──────────────────┤  ├────────┤ │
+│  │ id_archivo (PK) │  │ id_obs (PK)  │  │ id_prob (PK)     │  │id_surv │ │
+│  │ id_pozo (FK)    │  │ id_pozo (FK) │  │ id_pozo (FK)     │  │(PK)    │ │
+│  │ tipo_archivo    │  │ id_usuario   │  │ id_usuario       │  │id_pozo │ │
+│  │ ruta_archivo    │  │ (FK)         │  │ (FK)             │  │(FK)    │ │
+│  │ descripcion     │  │ texto_obs    │  │ descripcion_prob │  │depth   │ │
+│  │ fecha_subida    │  │ fecha_hora   │  │ fecha_hora       │  │azimuth │ │
+│  │ subido_por (FK) │  │ tipo_obs     │  │ resuelto         │  │dip     │ │
+│  │ (geologo/perf)  │  │ ('planta',   │  │ fecha_resolucion │  │fecha   │ │
+│  └─────────────────┘  │  'seccion')  │  └──────────────────┘  │medicion│ │
+│                        └──────────────┘                         └────────┘ │
+│                                                                              │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
+│  │  datos_geotecnia │  │ datos_litologicos│  │ observaciones_geo│          │
+│  ├──────────────────┤  ├──────────────────┤  ├──────────────────┤          │
+│  │ id_geotec (PK)   │  │ id_lito (PK)     │  │ id_obs_geo (PK)  │          │
+│  │ id_pozo (FK)     │  │ id_pozo (FK)     │  │ id_pozo (FK)     │          │
+│  │ ruta_csv         │  │ ruta_csv         │  │ id_geotecnico(FK)│          │
+│  │ fecha_subida     │  │ fecha_subida     │  │ texto_obs        │          │
+│  │ subido_por (FK)  │  │ subido_por (FK)  │  │ nivel_riesgo     │          │
+│  │ (geologo)        │  │ (geologo)        │  │ ('bajo','medio', │          │
+│  │ opcional: TRUE   │  │ opcional: TRUE   │  │  'alto','critico')│          │
+│  └──────────────────┘  └──────────────────┘  │ color_alerta     │          │
+│                                               │ fecha_hora       │          │
+│                                               └──────────────────┘          │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         AUDITORÍA Y LOGS                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────────┐    ┌──────────────────────┐                       │
+│  │   logs_modificaciones│    │   logs_hole_id_changes│                      │
+│  ├──────────────────────┤    ├──────────────────────┤                       │
+│  │ id_log (PK)          │    │ id_log (PK)          │                       │
+│  │ id_usuario (FK)      │    │ id_usuario (FK)      │                       │
+│  │ id_pozo (FK)         │    │ id_pozo (FK)         │                       │
+│  │ tabla_afectada       │    │ hole_id_anterior     │                       │
+│  │ campo_modificado     │    │ hole_id_nuevo        │                       │
+│  │ valor_anterior       │    │ motivo_cambio        │                       │
+│  │ valor_nuevo          │    │ fecha_hora           │                       │
+│  │ fecha_hora           │    │ numero_edicion       │                       │
+│  │ ip_address           │    │ (1, 2 o 3)           │                       │
+│  └──────────────────────┘    └──────────────────────┘                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
 
 ```mermaid
 erDiagram
