@@ -1,552 +1,102 @@
 # App-UndSurf
 App para gestión de pozos en mina subterránea y superficie. Util para transmitir los datos en forma ágil del Geologo que planifica el plan de perforación a los perforistas y luego compartir estos datos a otros profesionales como el ingeniero geotécnico o el ingeniero en minas para sus visitas a terreno.
 
----
+📡 Undsurf - Underground & Surface Drilling Management
+🌍 Español
+Descripción General
+Undsurf es una aplicación móvil y web diseñada para la gestión integral de pozos de perforación en minas subterráneas y a cielo abierto (superficie).
 
-## 📄 README.md Versión en Español - Castellano (and in the English language below)
+Su objetivo principal es agilizar la transmisión de datos entre los diferentes actores del área de mina. El flujo de trabajo comienza con el Geólogo de turno, quien planifica el plan de perforación y carga los datos iniciales. Inmediatamente, los Perforistas reciben esta información en terreno para ejecutar la perforación, y pueden reportar el avance en tiempo real. Finalmente, el Ingeniero Geotécnico y el Ingeniero de Minas utilizan estos datos actualizados para sus análisis, visitas a terreno y toma de decisiones, eliminando los errores de la comunicación por papel o mensajería informal.
 
-```markdown
-<p align="center">
-  <img src="https://github.com/Willy967/App-drillUndSurf/blob/main/logo-unsurf.png?raw=true" alt="Logo Undsurf" width="200"/>
-</p>
-# Undsurf - Sistema de Gestión de Datos de Perforación Minera
+👥 Roles y Permisos de Usuario
+Rol	Permisos y Funcionalidades
+👨‍🔬 Geólogo (Administrador)	Usuario principal. Carga los planos en PDF/JPG/PNG, sube las tablas CSV iniciales. Tiene control total sobre la edición de HOLE_ID (incluso después de finalizado el pozo). Registra modificaciones y visualiza el historial completo (quién, cuándo y qué cambió).
+⛏️ Perforista	Actualiza el avance de la perforación. Solo puede modificar la columna HOLE_ID (máximo 4 veces), pasadas esas ediciones debe solicitar permiso al Geólogo. Puede agregar observaciones (profundidades de veta, problemas como pérdida de retorno de agua por fallas).
+📐 Ingeniero Geotécnico	Acceso de solo lectura a los datos de perforación. Puede subir sus propias planillas CSV de geotecnia y agregar observaciones geotécnicas con colores (fecha y hora) debajo de la pestaña de locación, sin alterar los datos críticos de perforación.
+🚀 Características Principales
+🗂️ Gestor de HOLE_ID: Nombres únicos con formato estricto (Mayúsculas + Guión + Números). El sistema valida automáticamente si un HOLE_ID ya existe en la base de datos, mostrando una alerta para evitar duplicados.
 
-**Undsurf** es una aplicación integral de gestión operativa diseñada para agilizar el flujo de comunicación entre geólogos,
- perforistas e ingenieros de minas en minas subterráneas y a cielo abierto.
+🔒 Bloqueo de Pozos: Una vez que un pozo finaliza su perforación, el HOLE_ID y sus datos se bloquean (no se pueden editar). Solo el Geólogo Administrador tiene la potestad de desbloquearlo para cambios excepcionales.
 
-Reemplaza los formularios en papel por un flujo de trabajo digital en tiempo real. El Geólogo planifica el programa de perforación,
- el Perforista ejecuta y registra los avances, y otros profesionales (Ingeniero Geotécnico, Ingeniero de Minas) acceden a los
-datos validados al instante para la toma de decisiones en terreno.
+📊 Visualización de Planos y Riesgos (Semáforo): Los usuarios pueden subir planos (Planta y Sección) en formatos PDF, JPG, PNG, MP4, etc. Estos planos se superponen con un sistema semafórico (Rojo, Amarillo, Verde) para señalar riesgos geológicos o de infraestructura subterránea.
 
-## 🚀 Características Principales
+📂 Carga de Datos Técnicos: Soporte para subir archivos CSV de:
 
-- **Control de Acceso por Roles (RBAC):** Paneles y permisos personalizados para Geólogos (Administradores), Perforistas e
-Ingenieros Geotécnicos.
-- **Gestión Centralizada de Datos:** Carga y administración de datos de perforación mediante archivos CSV, con control
- estricto sobre los identificadores críticos.
-- **Mapeo Visual de Riesgos:** Carga de plantas y secciones (PDF, JPG, PNG) para marcar visualmente riesgos de infraestructura
- y peligros subterráneos.
-- **Autenticación Biométrica:** Inicio de sesión seguro mediante contraseña (primera vez) y reconocimiento de huella dactilar
- (sesiones posteriores).
-- **Buscador Avanzado:** Filtros múltiples por `HOLE_ID`, Ubicación, Mina, Perforista, Geólogo, Ingeniero Geotécnico, Fecha y
- Estado de Riesgo.
-- **Registro de Auditoría Completo:** Cada modificación realizada por cualquier usuario se registra con una marca de tiempo
- precisa (Fecha y Hora).
+Datos de perforación (obligatorio).
 
-## 👥 Roles de Usuario y Permisos
+Datos de Geotecnia (opcional).
 
-| Función / Acción | **Geólogo (Admin)** | **Perforista** | **Ing. Geotécnico** |
-| :--- | :---: | :---: | :---: |
-| **Cargar CSV inicial y Planos Visuales** | ✅ Sí | ❌ No | ❌ No |
-| **Editar `HOLE_ID` (Ilimitado)** | ✅ Sí | ❌ Limitado (Máx. 3 edits)* | ❌ No |
-| **Modificar Avance de Perforación** | ✅ Sí | ✅ Sí | ❌ No |
-| **Registrar Observaciones (Veta/Estéril)** | ✅ Sí | ✅ Sí | ❌ No |
-| **Registrar Problemas de Perforación** | ✅ Sí | ✅ Sí | ❌ No |
-| **Subir CSVs Geotécnicos y Riesgos Coloreados** | ✅ Sí | ❌ No | ✅ Sí (Solo Lectura + Añadir Riesgos) |
-| **Subir Datos Finales (Survey, Geotecnia, Litología)** | ✅ Sí | ✅ Limitado | ❌ No |
-| **Acceso (Solo Lectura)** | ✅ Sí | ✅ Sí | ✅ Sí |
+Datos de Survey / Desviación del pozo (opcional).
 
-> **\*Nota para Perforistas:** Solo pueden editar el `HOLE_ID` hasta 3 veces sin aprobación del administrador. Si superan
-este límite, deben solicitar permiso al Geólogo.
+Datos Litológicos (opcional).
 
-## 🔐 Reglas de Negocio Críticas (Gestión de HOLE_ID)
+🔎 Búsqueda y Filtros Avanzados: Buscador por HOLE_ID, Locación, Mina, Tipo (Underground/Surface), Perforista, Geólogo, Ingeniero, Fecha y Riesgo (color semáforo).
 
-Para garantizar la integridad de los datos, **Undsurf** aplica reglas de validación estrictas para la columna `HOLE_ID`:
+📱 Inicio Inteligente: La pantalla principal siempre muestra primero los pozos en proceso de perforación o avance, junto a sus riesgos asociados (sistema semafórico), para una rápida toma de decisiones.
 
-1.  **Unicidad:** El sistema valida que cada nuevo `HOLE_ID` no exista ya en la base de datos. Si existe, se muestra una
-alerta: *"Este HOLE_ID ya existe en la base de datos"*.
-2.  **Formato:** El `HOLE_ID` solo acepta **letras MAYÚSCULAS**.
-3.  **Bloqueo:** Una vez que un pozo finaliza su ejecución con un `HOLE_ID` específico, este se **bloquea**.
-    - El Perforista no puede modificarlo sin solicitar permiso.
-    - Solo el **Geólogo (Admin)** puede desbloquearlo y editarlo.
-4.  **Estado Final:** Una vez que un pozo se marca como **"Terminado"**, el `HOLE_ID` queda bloqueado de forma permanente.
-No se permiten más ediciones.
+🔐 Seguridad y Auditoría:
 
-## 📂 Carga de Datos y Gestión de Archivos
+Login con Usuario/Contraseña (primera vez).
 
-La aplicación maneja múltiples fuentes de datos según la fase de perforación:
+Datos Biométricos (Huella dactilar) para inicios de sesión posteriores.
 
-- **Configuración Inicial (Geólogo):**
-  - CSV principal de perforación.
-  - Imágenes de Planta/Sección (PDF, JPG, JPEG, PNG, TIFF, RAW) con indicadores de riesgo visuales.
-- **Durante la Perforación (Perforista):**
-  - Actualizaciones de la columna de Avance.
-  - Observaciones (Intersecciones de Veta / Estéril).
-  - Reportes de Problemas (ej. pérdida de retorno de agua por fallas).
-- **Proyecto Final (Geólogo/Perforista):**
-  - CSV de Survey (datos de desviación).
-  - CSV Geotécnico (opcional).
-  - CSV Litológico (opcional).
+Recuperación de contraseña vía correo electrónico.
 
-## 🔍 Búsqueda y Descubrimiento
+Registro completo de trazabilidad: cada modificación (Geólogo o Perforista) queda registrada con hora y fecha exacta.
 
-Los usuarios pueden localizar rápidamente pozos específicos usando la barra de búsqueda dedicada, filtrando por:
+🛠️ Tech Stack (Sugerido / Estructura de Datos)
+Base de Datos: Relacional (ej. PostgreSQL) con tablas para Pozos, Usuarios, Archivos CSV, Observaciones e Historial de Cambios.
 
-- `HOLE_ID`
-- Ubicación (Locación)
-- Mina
-- Nombre del Perforista
-- Nombre del Geólogo
-- Nombre del Ingeniero Geotécnico
-- Rango de Fechas
-- Nivel de Riesgo (Sistema colores semaforo)
+Backend: API RESTful para manejar la lógica de permisos y la validación de unicidad del HOLE_ID.
 
-## 🛡️ Seguridad y Autenticación
+Frontend: Aplicación móvil/híbrida con soporte para cámara (escaneo de planos) y lectores biométricos.
 
-- **Primer Inicio de Sesión:** Credenciales de Usuario/Contraseña.
-- **Inicios Posteriores:** Autenticación biométrica (Huella dactilar) para un acceso más rápido y seguro.
-- **Recuperación de Contraseña:** Totalmente soportada a través del correo electrónico registrado.
 
-## 🗄️ Modelo de Datos Conceptual (Relaciones)
+🌍 English
+Overview
+Undsurf is a mobile and web application designed for the comprehensive management of drilling holes in underground and open-pit (surface) mines.
 
-A continuación se muestra el diagrama de relaciones conceptuales para las tablas principales de la base de datos y
-las integraciones CSV:
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              USUARIOS Y AUTENTICACIÓN                        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────┐         ┌──────────────────┐         ┌─────────────────┐ │
-│  │   usuarios   │         │   roles_permisos │         │  auth_sessions  │ │
-│  ├──────────────┤         ├──────────────────┤         ├─────────────────┤ │
-│  │ id_usuario   │◄────────│ id_usuario (FK)  │         │ id_session      │ │
-│  │ username     │         │ id_rol (FK)      │         │ id_usuario (FK) │ │
-│  │ password_hash│         │ puede_editar     │         │ login_time      │ │
-│  │ email        │         │ puede_subir_arch │         │ logout_time     │ │
-│  │ rol          │         │ puede_ver_geotec │         │ ip_address      │ │
-│  │ biometrico   │         └──────────────────┘         │ device_info     │ │
-│  │ activo       │                                       └─────────────────┘ │
-│  └──────┬───────┘                                                           │
-│         │                                                                   │
-└─────────┼───────────────────────────────────────────────────────────────────┘
-          │
-          │ (1 a muchos)
-          │
-┌─────────┼───────────────────────────────────────────────────────────────────┐
-│         │                    POZOS Y DATOS PRINCIPALES                       │
-│         ▼                                                                   │
-│  ┌──────────────────┐                                                       │
-│  │      pozos       │  (Tabla principal - viene del CSV inicial)           │
-│  ├──────────────────┤                                                       │
-│  │ id_pozo (PK)     │                                                       │
-│  │ orden            │                                                       │
-│  │ rec_id           │                                                       │
-│  │ hole_id (UNIQUE) │  ◄── SOLO MAYÚSCULAS, ÚNICO, MÁX 3 EDICIONES        │
-│  │ este             │                                                       │
-│  │ norte            │                                                       │
-│  │ cota             │                                                       │
-│  │ length           │                                                       │
-│  │ target           │                                                       │
-│  │ az (azimuth)     │                                                       │
-│  │ dip              │                                                       │
-│  │ plataforma       │                                                       │
-│  │ estado           │  ('planificado', 'perforando', 'completado')         │
-│  │ id_perforista    │  (FK a usuarios)                                     │
-│  │ id_geologo       │  (FK a usuarios)                                     │
-│  │ id_geotecnico    │  (FK a usuarios)                                     │
-│  │ fecha_creacion   │                                                       │
-│  │ fecha_fin_perfor │                                                       │
-│  │ ediciones_hole_id│  (Contador: máximo 3)                                │
-│  └──────┬───────────┘                                                       │
-│         │                                                                   │
-│         ├────────────────────────────────────────────────────────────────┐  │
-│         │                    │                    │                      │  │
-│         ▼                    ▼                    ▼                      ▼  │
-│  ┌─────────────────┐  ┌──────────────┐  ┌──────────────────┐  ┌────────┐ │
-│  │ archivos_media  │  │ observaciones│  │  problemas_pozo  │  │ survey │ │
-│  ├─────────────────┤  ├──────────────┤  ├──────────────────┤  ├────────┤ │
-│  │ id_archivo (PK) │  │ id_obs (PK)  │  │ id_prob (PK)     │  │id_surv │ │
-│  │ id_pozo (FK)    │  │ id_pozo (FK) │  │ id_pozo (FK)     │  │(PK)    │ │
-│  │ tipo_archivo    │  │ id_usuario   │  │ id_usuario       │  │id_pozo │ │
-│  │ ruta_archivo    │  │ (FK)         │  │ (FK)             │  │(FK)    │ │
-│  │ descripcion     │  │ texto_obs    │  │ descripcion_prob │  │depth   │ │
-│  │ fecha_subida    │  │ fecha_hora   │  │ fecha_hora       │  │azimuth │ │
-│  │ subido_por (FK) │  │ tipo_obs     │  │ resuelto         │  │dip     │ │
-│  │ (geologo/perf)  │  │ ('planta',   │  │ fecha_resolucion │  │fecha   │ │
-│  └─────────────────┘  │  'seccion')  │  └──────────────────┘  │medicion│ │
-│                        └──────────────┘                         └────────┘ │
-│                                                                              │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
-│  │  datos_geotecnia │  │ datos_litologicos│  │ observaciones_geo│          │
-│  ├──────────────────┤  ├──────────────────┤  ├──────────────────┤          │
-│  │ id_geotec (PK)   │  │ id_lito (PK)     │  │ id_obs_geo (PK)  │          │
-│  │ id_pozo (FK)     │  │ id_pozo (FK)     │  │ id_pozo (FK)     │          │
-│  │ ruta_csv         │  │ ruta_csv         │  │ id_geotecnico(FK)│          │
-│  │ fecha_subida     │  │ fecha_subida     │  │ texto_obs        │          │
-│  │ subido_por (FK)  │  │ subido_por (FK)  │  │ nivel_riesgo     │          │
-│  │ (geologo)        │  │ (geologo)        │  │ ('bajo','medio', │          │
-│  │ opcional: TRUE   │  │ opcional: TRUE   │  │  'alto','critico')│          │
-│  └──────────────────┘  └──────────────────┘  │ color_alerta     │          │
-│                                               │ fecha_hora       │          │
-│                                               └──────────────────┘          │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
+Its primary goal is to streamline data transmission between different mine site stakeholders. The workflow starts with the Shift Geologist, who plans the drilling program and uploads the initial data. Instantly, Drillers receive this information on-site to execute the drilling and report progress in real-time. Finally, the Geotechnical Engineer and Mining Engineer utilize this updated data for analysis, site visits, and decision-making, eliminating the errors associated with paper-based or informal communication.
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                         AUDITORÍA Y LOGS                                     │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────────────┐    ┌──────────────────────┐                       │
-│  │   logs_modificaciones│    │   logs_hole_id_changes│                      │
-│  ├──────────────────────┤    ├──────────────────────┤                       │
-│  │ id_log (PK)          │    │ id_log (PK)          │                       │
-│  │ id_usuario (FK)      │    │ id_usuario (FK)      │                       │
-│  │ id_pozo (FK)         │    │ id_pozo (FK)         │                       │
-│  │ tabla_afectada       │    │ hole_id_anterior     │                       │
-│  │ campo_modificado     │    │ hole_id_nuevo        │                       │
-│  │ valor_anterior       │    │ motivo_cambio        │                       │
-│  │ valor_nuevo          │    │ fecha_hora           │                       │
-│  │ fecha_hora           │    │ numero_edicion       │                       │
-│  │ ip_address           │    │ (1, 2 o 3)           │                       │
-│  └──────────────────────┘    └──────────────────────┘                       │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
-```mermaid
-erDiagram
-    USERS ||--o{ DRILLING_DATA : gestiona
-    USERS {
-        int user_id PK
-        string name
-        string role "Geologo, Perforista, Geotecnico"
-        string email
-        string biometric_key
-    }
-    
-    DRILLING_DATA ||--o{ HOLE_PROGRESS : registra
-    DRILLING_DATA {
-        string HOLE_ID PK "Unico, Mayusculas"
-        string location
-        string mine
-        float target_depth
-        string status "Activo, Terminado"
-    }
-    
-    DRILLING_DATA ||--o{ OBSERVATIONS : contiene
-    OBSERVATIONS {
-        int obs_id PK
-        string HOLE_ID FK
-        string type "Veta, Esteril"
-        float depth
-        string created_by
-        datetime timestamp
-    }
-    
-    DRILLING_DATA ||--o{ PROBLEM_LOGS : contiene
-    PROBLEM_LOGS {
-        int problem_id PK
-        string HOLE_ID FK
-        string description "Perdida de agua, Falla, etc."
-        string status
-        datetime timestamp
-    }
-    
-    DRILLING_DATA ||--o{ GEOTECH_DATA : referencia
-    GEOTECH_DATA {
-        int geo_id PK
-        string HOLE_ID FK
-        blob csv_file
-        string uploaded_by
-        datetime timestamp
-    }
-    
-    DRILLING_DATA ||--o{ SURVEY_DATA : referencia
-    SURVEY_DATA {
-        int survey_id PK
-        string HOLE_ID FK
-        blob csv_file
-        float deviation
-    }
-    
-    DRILLING_DATA ||--o{ LITHOLOGY_DATA : referencia
-    LITHOLOGY_DATA {
-        int lith_id PK
-        string HOLE_ID FK
-        blob csv_file
-    }
-    
-    DRILLING_DATA ||--o{ RISKS : marca
-    RISKS {
-        int risk_id PK
-        string HOLE_ID FK
-        string risk_type
-        string color_code
-        string coordinates
-    }
-    
-    USERS ||--o{ AUDIT_LOGS : genera
-    AUDIT_LOGS {
-        int log_id PK
-        int user_id FK
-        string action "Editar HOLE_ID, Actualizar Avance, etc."
-        string field_changed
-        datetime timestamp
-    }
-# Undsurf - Mine Drilling Data Management System
+👥 User Roles & Permissions
+Role	Permissions & Functionalities
+👨‍🔬 Geologist (Admin)	Primary user. Uploads plans (PDF/JPG/PNG) and initial CSV tables. Has full control over HOLE_ID editing (even after the hole is completed). Logs all modifications and views complete history (who, when, and what changed).
+⛏️ Driller	Updates drilling progress. Can only modify the HOLE_ID column (maximum 4 times); after that, they must request permission from the Geologist. Can add observations (vein depths, issues like water return loss due to faults).
+📐 Geotechnical Engineer	Read-only access to drilling data. Can upload their own geotechnical CSV spreadsheets and add geotechnical observations with color codes (timestamped) under the location tab, without altering critical drilling data.
+🚀 Key Features
+🗂️ HOLE_ID Manager: Unique names with a strict format (Uppercase + Hyphen + Numbers). The system automatically validates if a HOLE_ID already exists in the database, displaying an alert to prevent duplicates.
 
-**Undsurf** is a comprehensive operational management application designed to streamline the communication flow
- between geologists, drillers, and mining engineers in underground and surface mines.
+🔒 Hole Locking: Once a hole is completed, the HOLE_ID and its data are locked (cannot be edited). Only the Geologist Admin has the authority to unlock it for exceptional changes.
 
-It replaces traditional paper-based forms with a digital, real-time workflow. The Geologist plans the drilling
-schedule, the Driller executes and logs progress, and other professionals (Geotechnical Engineers, Mining Engineers)
- access validated data instantly for on-site decision-making.
+📊 Plan & Risk Visualization (Traffic Light): Users can upload plans (Plan view and Section) in PDF, JPG, PNG, MP4, etc. These plans are overlaid with a traffic light system (Red, Yellow, Green) to flag geological or underground infrastructure risks.
 
-## 🚀 Core Features
+📂 Technical Data Upload: Support for uploading CSV files for:
 
-- **Role-Based Access Control (RBAC):** Customized dashboards and permissions for Geologists (Admins), Drillers,
- and Geotechnical Engineers.
-- **Centralized Data Management:** Upload and manage drilling data via CSV files, with strict control over critical
- identifiers.
-- **Visual Risk Mapping:** Upload plant layouts and section views (PDF, JPG, PNG) to visually mark infrastructure
- risks and underground hazards.
-- **Biometric Authentication:** Secure login using passwords (first time) and fingerprint recognition
- (subsequent sessions).
-- **Advanced Search Engine:** Multi-filter search by `HOLE_ID`, Location, Mine, Driller, Geologist, Geotechnical
- Engineer, Date, and Risk Status.
-- **Complete Audit Trail:** Every modification made by any user is logged with a precise timestamp (Date & Time).
+Drilling data (mandatory).
 
-## 👥 User Roles & Permissions
+Geotechnical data (optional).
 
-| Feature / Action | **Geologist (Admin)** | **Driller** | **Geotechnical Engineer** |
-| :--- | :---: | :---: | :---: |
-| **Upload initial CSV & Visual Plans** | ✅ Yes | ❌ No | ❌ No |
-| **Edit `HOLE_ID` (Unlimited)** | ✅ Yes | ❌ Limited (Max 3 edits)* | ❌ No |
-| **Modify Drilling Progress (Advance)** | ✅ Yes | ✅ Yes | ❌ No |
-| **Log Observations (Vein/Waste depths)** | ✅ Yes | ✅ Yes | ❌ No |
-| **Log Drilling Problems (Water loss, Faults)** | ✅ Yes | ✅ Yes | ❌ No |
-| **Add Geotechnical CSVs & Color-Coded Risks** | ✅ Yes | ❌ No | ✅ Yes (Read-Only + Add Risks) |
-| **Upload Final Data (Survey, Geotech, Lithology)** | ✅ Yes | ✅ Limited | ❌ No |
-| **Access (Read-Only View)** | ✅ Yes | ✅ Yes | ✅ Yes |
+Survey / Hole deviation data (optional).
 
-> **\*Note for Drillers:** You can only edit the `HOLE_ID` up to 3 times without admin approval. If you exceed
-this limit, you must request permission from the Geologist.
+Lithological data (optional).
 
-## 🔐 Critical Business Rules (HOLE_ID Management)
+🔎 Advanced Search & Filters: Search by HOLE_ID, Location, Mine, Type (Underground/Surface), Driller, Geologist, Engineer, Date, and Risk (traffic light color).
 
-To ensure data integrity, **Undsurf** enforces strict validation rules for the `HOLE_ID` column:
+📱 Smart Dashboard: The home screen always displays holes currently in progress or advancing first, along with their associated risks (traffic light system), enabling rapid decision-making.
 
-1.  **Uniqueness:** The system validates that every new `HOLE_ID` does not already exist in the database. If it
-does, an alert is displayed: *"This HOLE_ID already exists in the database"*.
-2.  **Format:** The `HOLE_ID` only accepts **UPPERCASE letters**.
-3.  **Locked State:** Once a drill hole finish execution with a specific `HOLE_ID`, it becomes **locked**. 
-    - The Driller cannot modify it without requesting permission.
-    - Only the **Geologist (Admin)** can unlock and edit it.
-4.  **Final State:** Once a drill hole is marked as **"Finished"**, the `HOLE_ID` is permanently locked. No further
-edits are allowed.
+🔐 Security & Auditing:
 
-## 📂 Data Uploads & File Management
+Login with Username/Password (first time).
 
-The application handles multiple data sources depending on the drilling phase:
+Biometric data (Fingerprint) for subsequent logins.
 
-- **Initial Setup (Geologist):**
-  - Main drilling CSV.
-  - Plant/Section images (PDF, JPG, JPEG, PNG, TIFF, RAW) with visual risk indicators.
-- **During Drilling (Driller):**
-  - Updates to the Advance column.
-  - Observations (Vein / Sterile intersections).
-  - Problem Reports (e.g., lost water return due to faults).
-- **Final Project (Geologist/Driller):**
-  - Survey CSV (deviation data).
-  - Geotechnical CSV (optional).
-  - Lithological CSV (optional).
+Password recovery via email.
 
-## 🔍 Search & Discovery
+Full traceability log: every modification (Geologist or Driller) is recorded with exact timestamps.
 
-Users can quickly locate specific drill holes using the dedicated search bar, filtering by:
+🛠️ Tech Stack (Suggested / Data Structure)
+Database: Relational (e.g., PostgreSQL) with tables for Holes, Users, CSV Files, Observations, and Change History.
 
-- `HOLE_ID`
-- Location
-- Mine
-- Driller Name
-- Geologist Name
-- Geotechnical Engineer Name
-- Date Range
-- Risk Level (Traffic light color system)
+Backend: RESTful API to handle permission logic and HOLE_ID uniqueness validation.
 
-## 🛡️ Security & Authentication
-
-- **First Login:** User/Password credentials.
-- **Subsequent Logins:** Biometric authentication (Fingerprint) for faster and more secure access.
-- **Password Recovery:** Fully supported via registered email address.
-
-## 🗄️ Conceptual Data Model (Relationships)
-
-Below is the conceptual relationship diagram for the core database tables and CSV integrations:
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              USUARIOS Y AUTENTICACIÓN                        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────┐         ┌──────────────────┐         ┌─────────────────┐ │
-│  │   usuarios   │         │   roles_permisos │         │  auth_sessions  │ │
-│  ├──────────────┤         ├──────────────────┤         ├─────────────────┤ │
-│  │ id_usuario   │◄────────│ id_usuario (FK)  │         │ id_session      │ │
-│  │ username     │         │ id_rol (FK)      │         │ id_usuario (FK) │ │
-│  │ password_hash│         │ puede_editar     │         │ login_time      │ │
-│  │ email        │         │ puede_subir_arch │         │ logout_time     │ │
-│  │ rol          │         │ puede_ver_geotec │         │ ip_address      │ │
-│  │ biometrico   │         └──────────────────┘         │ device_info     │ │
-│  │ activo       │                                       └─────────────────┘ │
-│  └──────┬───────┘                                                           │
-│         │                                                                   │
-└─────────┼───────────────────────────────────────────────────────────────────┘
-          │
-          │ (1 a muchos)
-          │
-┌─────────┼───────────────────────────────────────────────────────────────────┐
-│         │                    POZOS Y DATOS PRINCIPALES                       │
-│         ▼                                                                   │
-│  ┌──────────────────┐                                                       │
-│  │      pozos       │  (Tabla principal - viene del CSV inicial)           │
-│  ├──────────────────┤                                                       │
-│  │ id_pozo (PK)     │                                                       │
-│  │ orden            │                                                       │
-│  │ rec_id           │                                                       │
-│  │ hole_id (UNIQUE) │  ◄── SOLO MAYÚSCULAS, ÚNICO, MÁX 3 EDICIONES        │
-│  │ este             │                                                       │
-│  │ norte            │                                                       │
-│  │ cota             │                                                       │
-│  │ length           │                                                       │
-│  │ target           │                                                       │
-│  │ az (azimuth)     │                                                       │
-│  │ dip              │                                                       │
-│  │ plataforma       │                                                       │
-│  │ estado           │  ('planificado', 'perforando', 'completado')         │
-│  │ id_perforista    │  (FK a usuarios)                                     │
-│  │ id_geologo       │  (FK a usuarios)                                     │
-│  │ id_geotecnico    │  (FK a usuarios)                                     │
-│  │ fecha_creacion   │                                                       │
-│  │ fecha_fin_perfor │                                                       │
-│  │ ediciones_hole_id│  (Contador: máximo 3)                                │
-│  └──────┬───────────┘                                                       │
-│         │                                                                   │
-│         ├────────────────────────────────────────────────────────────────┐  │
-│         │                    │                    │                      │  │
-│         ▼                    ▼                    ▼                      ▼  │
-│  ┌─────────────────┐  ┌──────────────┐  ┌──────────────────┐  ┌────────┐ │
-│  │ archivos_media  │  │ observaciones│  │  problemas_pozo  │  │ survey │ │
-│  ├─────────────────┤  ├──────────────┤  ├──────────────────┤  ├────────┤ │
-│  │ id_archivo (PK) │  │ id_obs (PK)  │  │ id_prob (PK)     │  │id_surv │ │
-│  │ id_pozo (FK)    │  │ id_pozo (FK) │  │ id_pozo (FK)     │  │(PK)    │ │
-│  │ tipo_archivo    │  │ id_usuario   │  │ id_usuario       │  │id_pozo │ │
-│  │ ruta_archivo    │  │ (FK)         │  │ (FK)             │  │(FK)    │ │
-│  │ descripcion     │  │ texto_obs    │  │ descripcion_prob │  │depth   │ │
-│  │ fecha_subida    │  │ fecha_hora   │  │ fecha_hora       │  │azimuth │ │
-│  │ subido_por (FK) │  │ tipo_obs     │  │ resuelto         │  │dip     │ │
-│  │ (geologo/perf)  │  │ ('planta',   │  │ fecha_resolucion │  │fecha   │ │
-│  └─────────────────┘  │  'seccion')  │  └──────────────────┘  │medicion│ │
-│                        └──────────────┘                         └────────┘ │
-│                                                                              │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
-│  │  datos_geotecnia │  │ datos_litologicos│  │ observaciones_geo│          │
-│  ├──────────────────┤  ├──────────────────┤  ├──────────────────┤          │
-│  │ id_geotec (PK)   │  │ id_lito (PK)     │  │ id_obs_geo (PK)  │          │
-│  │ id_pozo (FK)     │  │ id_pozo (FK)     │  │ id_pozo (FK)     │          │
-│  │ ruta_csv         │  │ ruta_csv         │  │ id_geotecnico(FK)│          │
-│  │ fecha_subida     │  │ fecha_subida     │  │ texto_obs        │          │
-│  │ subido_por (FK)  │  │ subido_por (FK)  │  │ nivel_riesgo     │          │
-│  │ (geologo)        │  │ (geologo)        │  │ ('bajo','medio', │          │
-│  │ opcional: TRUE   │  │ opcional: TRUE   │  │  'alto','critico')│          │
-│  └──────────────────┘  └──────────────────┘  │ color_alerta     │          │
-│                                               │ fecha_hora       │          │
-│                                               └──────────────────┘          │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                         AUDITORÍA Y LOGS                                     │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────────────┐    ┌──────────────────────┐                       │
-│  │   logs_modificaciones│    │   logs_hole_id_changes│                      │
-│  ├──────────────────────┤    ├──────────────────────┤                       │
-│  │ id_log (PK)          │    │ id_log (PK)          │                       │
-│  │ id_usuario (FK)      │    │ id_usuario (FK)      │                       │
-│  │ id_pozo (FK)         │    │ id_pozo (FK)         │                       │
-│  │ tabla_afectada       │    │ hole_id_anterior     │                       │
-│  │ campo_modificado     │    │ hole_id_nuevo        │                       │
-│  │ valor_anterior       │    │ motivo_cambio        │                       │
-│  │ valor_nuevo          │    │ fecha_hora           │                       │
-│  │ fecha_hora           │    │ numero_edicion       │                       │
-│  │ ip_address           │    │ (1, 2 o 3)           │                       │
-│  └──────────────────────┘    └──────────────────────┘                       │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
-
-```mermaid
-erDiagram
-    USERS ||--o{ DRILLING_DATA : manages
-    USERS {
-        int user_id PK
-        string name
-        string role "Geologist, Driller, Geotech"
-        string email
-        string biometric_key
-    }
-    
-    DRILLING_DATA ||--o{ HOLE_PROGRESS : tracks
-    DRILLING_DATA {
-        string HOLE_ID PK "Unique, Uppercase"
-        string location
-        string mine
-        float target_depth
-        string status "Active, Finished"
-    }
-    
-    DRILLING_DATA ||--o{ OBSERVATIONS : contains
-    OBSERVATIONS {
-        int obs_id PK
-        string HOLE_ID FK
-        string type "Vein, Sterile"
-        float depth
-        string created_by
-        datetime timestamp
-    }
-    
-    DRILLING_DATA ||--o{ PROBLEM_LOGS : contains
-    PROBLEM_LOGS {
-        int problem_id PK
-        string HOLE_ID FK
-        string description "Water loss, Fault, etc."
-        string status
-        datetime timestamp
-    }
-    
-    DRILLING_DATA ||--o{ GEOTECH_DATA : references
-    GEOTECH_DATA {
-        int geo_id PK
-        string HOLE_ID FK
-        blob csv_file
-        string uploaded_by
-        datetime timestamp
-    }
-    
-    DRILLING_DATA ||--o{ SURVEY_DATA : references
-    SURVEY_DATA {
-        int survey_id PK
-        string HOLE_ID FK
-        blob csv_file
-        float deviation
-    }
-    
-    DRILLING_DATA ||--o{ LITHOLOGY_DATA : references
-    LITHOLOGY_DATA {
-        int lith_id PK
-        string HOLE_ID FK
-        blob csv_file
-    }
-    
-    DRILLING_DATA ||--o{ RISKS : marks
-    RISKS {
-        int risk_id PK
-        string HOLE_ID FK
-        string risk_type
-        string color_code
-        string coordinates
-    }
-    
-    USERS ||--o{ AUDIT_LOGS : generates
-    AUDIT_LOGS {
-        int log_id PK
-        int user_id FK
-        string action "Edit HOLE_ID, Update Progress, etc."
-        string field_changed
-        datetime timestamp
-    }
+Frontend: Mobile/Hybrid application with support for camera (plan scanning) and biometric readers.
