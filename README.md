@@ -89,7 +89,7 @@ Los usuarios pueden localizar rápidamente pozos específicos usando la barra de
 - Nombre del Geólogo
 - Nombre del Ingeniero Geotécnico
 - Rango de Fechas
-- Nivel de Riesgo
+- Nivel de Riesgo (Sistema colores semaforo)
 
 ## 🛡️ Seguridad y Autenticación
 
@@ -359,7 +359,7 @@ Users can quickly locate specific drill holes using the dedicated search bar, fi
 - Geologist Name
 - Geotechnical Engineer Name
 - Date Range
-- Risk Level
+- Risk Level (Traffic light color system)
 
 ## 🛡️ Security & Authentication
 
