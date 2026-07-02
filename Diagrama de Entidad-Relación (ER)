@@ -1,0 +1,153 @@
+Diagrama entidad-relacion (ER)
+
+erDiagram
+    %% RELACIONES PRINCIPALES
+    USUARIOS ||--o{ POZOS : "crea / perfora / supervisa"
+    USUARIOS ||--o{ AUDITORIA_POZOS : "registra cambios"
+    USUARIOS ||--o{ OBSERVACIONES_PERFORISTA : "ingresa"
+    USUARIOS ||--o{ PROBLEMAS_POZO : "reporta"
+    USUARIOS ||--o{ RIESGOS : "evalua"
+    USUARIOS ||--o{ ARCHIVOS_ADJUNTOS : "sube"
+    USUARIOS ||--o{ DATOS_GEOTECNICOS : "sube CSV"
+    USUARIOS ||--o{ DATOS_SURVEY : "sube"
+    USUARIOS ||--o{ DATOS_LITOLOGICOS : "sube CSV"
+    USUARIOS ||--o{ LOGIN_LOG : "inicia sesion"
+
+    POZOS ||--o{ AUDITORIA_POZOS : "tiene historial"
+    POZOS ||--o{ OBSERVACIONES_PERFORISTA : "tiene observaciones"
+    POZOS ||--o{ PROBLEMAS_POZO : "presenta problemas"
+    POZOS ||--o{ RIESGOS : "tiene riesgos"
+    POZOS ||--o{ ARCHIVOS_ADJUNTOS : "tiene adjuntos"
+    POZOS ||--o{ DATOS_GEOTECNICOS : "tiene datos geotecnicos"
+    POZOS ||--o{ DATOS_SURVEY : "tiene survey"
+    POZOS ||--o{ DATOS_LITOLOGICOS : "tiene litologia"
+
+    %% ENTIDADES Y ATRIBUTOS
+
+    USUARIOS {
+        int id_usuario PK
+        string username UK
+        string password_hash
+        string email UK
+        string huella_hash "Template biometrico"
+        string rol "geologo, perforista, geotecnico"
+        boolean activo
+        datetime fecha_registro
+        datetime ultimo_login
+    }
+
+    POZOS {
+        int id_pozo PK
+        int orden "Del CSV"
+        string rec_id "Del CSV"
+        string hole_id UK "Formato: MAYUS-GUION-NUM"
+        float este "Del CSV"
+        float norte "Del CSV"
+        float cota "Del CSV"
+        float length "Del CSV"
+        string target "Del CSV"
+        float az "Del CSV"
+        float dip "Del CSV"
+        string plataforma "Del CSV"
+        string mina "Ubicacion"
+        string tipo_ubicacion "Underground, Surface"
+        string estado "planificado, en_perforacion, completado"
+        int id_geologo_creador FK
+        int id_perforista_asignado FK
+        boolean perforacion_finalizada
+        int ediciones_hole_id_restantes "Max 4 para perforista"
+        datetime fecha_creacion
+    }
+
+    AUDITORIA_POZOS {
+        int id_auditoria PK
+        int id_pozo FK
+        int id_usuario FK
+        string campo_modificado "Ej: hole_id, estado"
+        string valor_anterior
+        string valor_nuevo
+        datetime fecha_hora
+        string ip_address
+    }
+
+    OBSERVACIONES_PERFORISTA {
+        int id_obs PK
+        int id_pozo FK
+        int id_usuario FK
+        float profundidad "Donde corto veta/esteril"
+        string descripcion
+        string tipo "corte_veta, corte_estéril"
+        datetime fecha_hora
+    }
+
+    PROBLEMAS_POZO {
+        int id_prob PK
+        int id_pozo FK
+        int id_usuario FK
+        string descripcion "Ej: perdio retorno de agua"
+        string tipo_falla
+        string acciones_tomadas
+        boolean resuelto
+        datetime fecha_hora
+    }
+
+    RIESGOS {
+        int id_riesgo PK
+        int id_pozo FK "Nullable si es de locacion general"
+        string id_locacion "Si es riesgo general de planta"
+        int id_usuario FK
+        string nivel_semaforo "verde, amarillo, rojo"
+        string descripcion
+        datetime fecha_hora
+    }
+
+    ARCHIVOS_ADJUNTOS {
+        int id_archivo PK
+        int id_pozo FK
+        int id_usuario_subio FK
+        string tipo "planta, seccion"
+        string formato "pdf, jpg, jpeg, png, tiff, raw, mpeg, mp4"
+        string nombre_archivo
+        string ruta_archivo
+        datetime fecha_subida
+    }
+
+    DATOS_GEOTECNICOS {
+        int id_geotecnia PK
+        int id_pozo FK
+        int id_usuario_subio FK
+        string archivo_origen "Nombre del CSV"
+        json datos_json "Contenido del CSV parseado"
+        datetime fecha_subida
+    }
+
+    DATOS_SURVEY {
+        int id_survey PK
+        int id_pozo FK
+        int id_usuario_subio FK
+        float profundidad_from
+        float profundidad_to
+        float desviacion_az
+        float desviacion_dip
+        datetime fecha_subida
+    }
+
+    DATOS_LITOLOGICOS {
+        int id_lito PK
+        int id_pozo FK
+        int id_usuario_subio FK
+        string archivo_origen "Nombre del CSV"
+        json datos_json "Contenido del CSV parseado"
+        datetime fecha_subida
+    }
+
+    LOGIN_LOG {
+        int id_login PK
+        int id_usuario FK
+        datetime fecha_hora
+        string tipo_auth "password, biometrico"
+        boolean exitoso
+        string ip_address
+    }
+
+
