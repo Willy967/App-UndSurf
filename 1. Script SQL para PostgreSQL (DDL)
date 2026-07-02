@@ -1,0 +1,147 @@
+1. Script SQL para PostgreSQL (DDL)
+
+-- 1. Crear tipos ENUM para roles, estados y semáforos
+CREATE TYPE rol_usuario AS ENUM ('geologo', 'perforista', 'geotecnico');
+CREATE TYPE estado_pozo AS ENUM ('planificado', 'en_perforacion', 'completado', 'suspendido');
+CREATE TYPE tipo_ubicacion AS ENUM ('Underground', 'Surface');
+CREATE TYPE nivel_semaforo AS ENUM ('verde', 'amarillo', 'rojo');
+CREATE TYPE formato_archivo AS ENUM ('pdf', 'jpg', 'jpeg', 'png', 'tiff', 'raw', 'mpeg', 'mp4', 'csv');
+
+-- 2. Tabla de Usuarios
+CREATE TABLE usuarios (
+    id_usuario SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    huella_hash VARCHAR(255), -- Para guardar el template de la huella
+    rol rol_usuario NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ultimo_login TIMESTAMP
+);
+
+-- 3. Tabla Principal de Pozos (Basado en tu CSV)
+CREATE TABLE pozos (
+    id_pozo SERIAL PRIMARY KEY,
+    orden INTEGER,
+    rec_id VARCHAR(50),
+    hole_id VARCHAR(50) UNIQUE NOT NULL,
+    este DECIMAL(10,2),
+    norte DECIMAL(10,2),
+    cota DECIMAL(10,2),
+    length DECIMAL(8,2),
+    target VARCHAR(50),
+    az DECIMAL(6,2),
+    dip DECIMAL(6,2),
+    plataforma VARCHAR(50),
+    mina VARCHAR(50),
+    tipo_ubicacion tipo_ubicacion,
+    estado estado_pozo DEFAULT 'planificado',
+    id_geologo_creador INTEGER REFERENCES usuarios(id_usuario),
+    id_perforista_asignado INTEGER REFERENCES usuarios(id_usuario),
+    id_geotecnico_asignado INTEGER REFERENCES usuarios(id_usuario),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_inicio_perforacion TIMESTAMP,
+    fecha_fin_perforacion TIMESTAMP,
+    perforacion_finalizada BOOLEAN DEFAULT FALSE,
+    ediciones_hole_id_restantes INTEGER DEFAULT 4,
+    
+    -- Restricción: HOLE_ID solo admite mayúsculas, guion y números (Ej: LEK-0325)
+    CONSTRAINT chk_hole_id_format CHECK (hole_id ~ '^[A-Z]+-[0-9]+$')
+);
+
+-- 4. Tabla de Auditoría (Registro de quién modificó qué y cuándo)
+CREATE TABLE auditoria_pozos (
+    id_auditoria SERIAL PRIMARY KEY,
+    id_pozo INTEGER REFERENCES pozos(id_pozo) ON DELETE CASCADE,
+    id_usuario INTEGER REFERENCES usuarios(id_usuario),
+    campo_modificado VARCHAR(50),
+    valor_anterior TEXT,
+    valor_nuevo TEXT,
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ip_address VARCHAR(50)
+);
+
+-- 5. Observaciones del Perforista
+CREATE TABLE observaciones_perforista (
+    id_obs SERIAL PRIMARY KEY,
+    id_pozo INTEGER REFERENCES pozos(id_pozo) ON DELETE CASCADE,
+    id_usuario INTEGER REFERENCES usuarios(id_usuario),
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    profundidad DECIMAL(8,2),
+    descripcion TEXT,
+    tipo VARCHAR(20) CHECK (tipo IN ('corte_veta', 'corte_estéril', 'otro'))
+);
+
+-- 6. Problemas del Pozo
+CREATE TABLE problemas_pozo (
+    id_prob SERIAL PRIMARY KEY,
+    id_pozo INTEGER REFERENCES pozos(id_pozo) ON DELETE CASCADE,
+    id_usuario INTEGER REFERENCES usuarios(id_usuario),
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    descripcion TEXT,
+    tipo_falla VARCHAR(50),
+    acciones_tomadas TEXT,
+    resuelto BOOLEAN DEFAULT FALSE
+);
+
+-- 7. Riesgos (Pozo y Locación)
+CREATE TABLE riesgos (
+    id_riesgo SERIAL PRIMARY KEY,
+    id_pozo INTEGER REFERENCES pozos(id_pozo) ON DELETE CASCADE, -- NULL si es riesgo de locación general
+    id_locacion VARCHAR(50), -- Identificador de la locación si no está ligado a un pozo específico
+    id_usuario INTEGER REFERENCES usuarios(id_usuario),
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    descripcion TEXT,
+    nivel nivel_semaforo NOT NULL
+);
+
+-- 8. Archivos Adjuntos (Planos, Secciones, etc.)
+CREATE TABLE archivos_adjuntos (
+    id_archivo SERIAL PRIMARY KEY,
+    id_pozo INTEGER REFERENCES pozos(id_pozo) ON DELETE CASCADE,
+    id_usuario INTEGER REFERENCES usuarios(id_usuario),
+    tipo_archivo VARCHAR(20) CHECK (tipo_archivo IN ('planta', 'seccion', 'geotecnia', 'survey', 'litologia')),
+    nombre_archivo VARCHAR(255),
+    ruta_archivo TEXT,
+    formato formato_archivo,
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 9. Datos Geotécnicos (Desde CSV)
+CREATE TABLE datos_geotecnicos (
+    id_geotecnia SERIAL PRIMARY KEY,
+    id_pozo INTEGER REFERENCES pozos(id_pozo) ON DELETE CASCADE,
+    id_usuario INTEGER REFERENCES usuarios(id_usuario),
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    archivo_origen VARCHAR(255),
+    datos_json JSONB -- Guardamos el CSV parseado como JSON para flexibilidad
+);
+
+-- 10. Datos de Survey (Desviación)
+CREATE TABLE datos_survey (
+    id_survey SERIAL PRIMARY KEY,
+    id_pozo INTEGER REFERENCES pozos(id_pozo) ON DELETE CASCADE,
+    id_usuario INTEGER REFERENCES usuarios(id_usuario),
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    profundidad_from DECIMAL(8,2),
+    profundidad_to DECIMAL(8,2),
+    desviacion_az DECIMAL(6,2),
+    desviacion_dip DECIMAL(6,2)
+);
+
+-- 11. Datos Litología (Desde CSV)
+CREATE TABLE datos_litologicos (
+    id_lito SERIAL PRIMARY KEY,
+    id_pozo INTEGER REFERENCES pozos(id_pozo) ON DELETE CASCADE,
+    id_usuario INTEGER REFERENCES usuarios(id_usuario),
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    archivo_origen VARCHAR(255),
+    datos_json JSONB
+);
+
+-- Índices para optimizar las búsquedas del buscador principal
+CREATE INDEX idx_pozos_hole_id ON pozos(hole_id);
+CREATE INDEX idx_pozos_mina ON pozos(mina);
+CREATE INDEX idx_pozos_estado ON pozos(estado);
+CREATE INDEX idx_pozos_ubicacion ON pozos(tipo_ubicacion);
