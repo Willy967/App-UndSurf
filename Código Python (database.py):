@@ -1,0 +1,212 @@
+from sqlalchemy import create_engine, Column, Integer, String, Enum, DateTime, Boolean, ForeignKey, Numeric, Text, JSON, CheckConstraint
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from datetime import datetime
+import enum
+
+# --- Configuración de la Base de Datos ---
+# Cambia 'usuario', 'contraseña', 'host', 'puerto', 'nombre_db' por tus datos reales
+DATABASE_URL = "postgresql+psycopg2://postgres:mi_password@localhost:5432/infill_pozos"
+
+engine = create_engine(DATABASE_URL, echo=False)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# --- Definición de Enums ---
+class RolUsuario(str, enum.Enum):
+    GEOLOGO = "geologo"
+    PERFORISTA = "perforista"
+    GEOTECNICO = "geotecnico"
+
+class EstadoPozo(str, enum.Enum):
+    PLANIFICADO = "planificado"
+    EN_PERFORACION = "en_perforacion"
+    COMPLETADO = "completado"
+    SUSPENDIDO = "suspendido"
+
+class NivelSemaforo(str, enum.Enum):
+    VERDE = "verde"
+    AMARILLO = "amarillo"
+    ROJO = "rojo"
+
+# --- Modelos ORM (Tablas) ---
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+    id_usuario = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    huella_hash = Column(String(255))
+    rol = Column(Enum(RolUsuario), nullable=False)
+    activo = Column(Boolean, default=True)
+    fecha_registro = Column(DateTime, default=datetime.utcnow)
+    
+    # Relaciones
+    pozos_creados = relationship("Pozo", foreign_keys="Pozo.id_geologo_creador", back_populates="geologo_creador")
+
+class Pozo(Base):
+    __tablename__ = "pozos"
+    
+    id_pozo = Column(Integer, primary_key=True, index=True)
+    orden = Column(Integer)
+    rec_id = Column(String(50))
+    hole_id = Column(String(50), unique=True, nullable=False)
+    este = Column(Numeric(10, 2))
+    norte = Column(Numeric(10, 2))
+    cota = Column(Numeric(10, 2))
+    length = Column(Numeric(8, 2))
+    target = Column(String(50))
+    az = Column(Numeric(6, 2))
+    dip = Column(Numeric(6, 2))
+    plataforma = Column(String(50))
+    mina = Column(String(50))
+    tipo_ubicacion = Column(String(20)) # Underground / Surface
+    estado = Column(Enum(EstadoPozo), default=EstadoPozo.PLANIFICADO)
+    
+    id_geologo_creador = Column(Integer, ForeignKey("usuarios.id_usuario"))
+    id_perforista_asignado = Column(Integer, ForeignKey("usuarios.id_usuario"))
+    
+    fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    perforacion_finalizada = Column(Boolean, default=False)
+    ediciones_hole_id_restantes = Column(Integer, default=4)
+    
+    # Restricción de formato para HOLE_ID (Letras mayúsculas, guion, números)
+    __table_args__ = (
+        CheckConstraint("hole_id ~ '^[A-Z]+-[0-9]+$'", name='chk_hole_id_format'),
+    )
+
+    # Relaciones
+    geologo_creador = relationship("Usuario", foreign_keys=[id_geologo_creador], back_populates="pozos_creados")
+    auditoria = relationship("AuditoriaPozo", back_populates="pozo", cascade="all, delete-orphan")
+    observaciones = relationship("ObservacionPerforista", back_populates="pozo", cascade="all, delete-orphan")
+    riesgos = relationship("Riesgo", back_populates="pozo", cascade="all, delete-orphan")
+
+class AuditoriaPozo(Base):
+    __tablename__ = "auditoria_pozos"
+    id_auditoria = Column(Integer, primary_key=True, index=True)
+    id_pozo = Column(Integer, ForeignKey("pozos.id_pozo"))
+    id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"))
+    campo_modificado = Column(String(50))
+    valor_anterior = Column(Text)
+    valor_nuevo = Column(Text)
+    fecha_hora = Column(DateTime, default=datetime.utcnow)
+    
+    pozo = relationship("Pozo", back_populates="auditoria")
+
+class ObservacionPerforista(Base):
+    __tablename__ = "observaciones_perforista"
+    id_obs = Column(Integer, primary_key=True, index=True)
+    id_pozo = Column(Integer, ForeignKey("pozos.id_pozo"))
+    id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"))
+    fecha_hora = Column(DateTime, default=datetime.utcnow)
+    profundidad = Column(Numeric(8, 2))
+    descripcion = Column(Text)
+    tipo = Column(String(20)) # corte_veta, corte_estéril
+    
+    pozo = relationship("Pozo", back_populates="observaciones")
+
+class Riesgo(Base):
+    __tablename__ = "riesgos"
+    id_riesgo = Column(Integer, primary_key=True, index=True)
+    id_pozo = Column(Integer, ForeignKey("pozos.id_pozo"), nullable=True)
+    id_locacion = Column(String(50), nullable=True) # Para riesgos de locación general
+    id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"))
+    fecha_hora = Column(DateTime, default=datetime.utcnow)
+    descripcion = Column(Text)
+    nivel = Column(Enum(NivelSemaforo), nullable=False)
+    
+    pozo = relationship("Pozo", back_populates="riesgos")
+
+# --- Funciones de Utilidad para la App ---
+
+def crear_tablas():
+    """Crea todas las tablas en la base de datos si no existen."""
+    Base.metadata.create_all(bind=engine)
+    print("Tablas creadas/verificadas exitosamente en PostgreSQL.")
+
+def get_db():
+    """Generador para obtener sesiones de base de datos."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# --- Ejemplo de uso en tu App ---
+if __name__ == "__main__":
+    # 1. Crear la estructura en PostgreSQL
+    crear_tablas()
+    
+    # 2. Ejemplo de cómo insertar un pozo desde el CSV
+    db = SessionLocal()
+    
+    nuevo_pozo = Pozo(
+        orden=1,
+        rec_id="RLEK-0523",
+        hole_id="LEK-0325",  # Pasará el CHECK de mayúsculas y guion
+        este=2394067.33,
+        norte=4808282.14,
+        cota=559,
+        length=125,
+        az=42,
+        dip=-47,
+        plataforma="GTW 554",
+        mina="Mina Ejemplo",
+        tipo_ubicacion="Underground",
+        estado=EstadoPozo.EN_PERFORACION,
+        ediciones_hole_id_restantes=4
+    )
+    
+    try:
+        db.add(nuevo_pozo)
+        db.commit()
+        print(f"Pozo {nuevo_pozo.hole_id} guardado con ID: {nuevo_pozo.id_pozo}")
+    except Exception as e:
+        db.rollback()
+        print(f"Error al guardar: {e}")
+    finally:
+        db.close()
+
+
+💡 Consejos Clave para la Lógica de tu Aplicación (Python)
+Para cumplir con las reglas de negocio que mencionaste, te sugiero implementar estas funciones en tu código Python (en la capa de lógica de la app, no en la base de datos):
+Validación de Ediciones del HOLE_ID (Límite de 4 veces):
+Antes de permitir que el perforista cambie el HOLE_ID, haz esto en Python:
+
+def actualizar_hole_id(db, pozo, nuevo_hole_id, usuario):
+    if pozo.perforacion_finalizada:
+        raise PermissionError("El pozo ya está finalizado. Solo el Geólogo Admin puede modificarlo.")
+    
+    if usuario.rol == 'perforista' and pozo.ediciones_hole_id_restantes <= 0:
+        raise PermissionError("Ha alcanzado el límite de 4 ediciones. Contacte al Geólogo.")
+    
+    # Registrar en auditoría
+    aud = AuditoriaPozo(id_pozo=pozo.id_pozo, id_usuario=usuario.id_usuario, 
+                        campo_modificado="hole_id", valor_anterior=pozo.hole_id, valor_nuevo=nuevo_hole_id)
+    db.add(aud)
+    
+    # Actualizar pozo
+    pozo.hole_id = nuevo_hole_id
+    if usuario.rol == 'perforista':
+        pozo.ediciones_hole_id_restantes -= 1
+        
+    db.commit()
+
+Carga de CSV (Geotecnia / Litología):
+Usa pandas para leer el CSV y guárdalo como JSON en la base de datos. Es muchísimo más rápido y flexible.
+import pandas as pd
+import json
+
+def cargar_csv_geotecnia(db, ruta_csv, id_pozo, id_usuario):
+    df = pd.read_csv(ruta_csv)
+    # Convertir a JSON
+    datos_json = df.to_json(orient="records") 
+    
+    nuevo_registro = DatosGeotecnicos(
+        id_pozo=id_pozo,
+        id_usuario=id_usuario,
+        archivo_origen=ruta_csv,
+        datos_json=datos_json
+    )
+    db.add(nuevo_registro)
+    db.commit()
