@@ -238,6 +238,9 @@ DIAGRAMA ENTIDAD-RELACIÓN COMPLETO
 │  │ [📄 Planta.pdf] [📄 Seccion.jpg] [📄 Geotecnia.csv]│   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
+Diagrama ER
+
+<img width="1664" height="928" alt="Diagrama ER" src="https://github.com/user-attachments/assets/3eae6728-f97d-49c5-af55-c213a249e32f" />
 
 🌍 English
 Overview
