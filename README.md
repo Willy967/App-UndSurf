@@ -52,131 +52,136 @@ Backend: API RESTful para manejar la lógica de permisos y la validación de uni
 Frontend: Aplicación móvil/híbrida con soporte para cámara (escaneo de planos) y lectores biométricos.
 
 DIAGRAMA ENTIDAD-RELACIÓN COMPLETO
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              USUARIOS Y PERMISOS                            │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              USUARIOS Y PERMISOS                                │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────┐
-│    usuarios     │
-├─────────────────┤
-│ id_usuario (PK) │◄────┐
-│ username        │     │
-│ password_hash   │     │
-│ email           │     │
-│ rol             │     │ (geologo_admin, perforista, ingeniero_geotecnico)
-│ nombre_completo │     │
-│ biometrico_hash │     │
-│ activo          │     │
-│ created_at      │     │
-└────────┬────────┘     │
-         │              │
-         │ (1 a muchos) │
-         │              │
-         ▼              │
-┌─────────────────┐     │
-│  auditoria_logs │     │
-├─────────────────┤     │
-│ id_log (PK)     │     │
-│ id_usuario (FK) │─────┘
-│ tabla_afectada  │
-│ registro_id     │
-│ accion          │ (INSERT, UPDATE, DELETE)
-│ campo_modificado│
-│ valor_anterior  │
-│ valor_nuevo     │
-│ ip_address      │
-│ timestamp       │
-└─────────────────┘
+┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐
+│     usuarios     │       │  roles_usuario   │       │  permisos_rol    │
+├──────────────────┤       ├──────────────────┤       ├──────────────────┤
+│ id_usuario (PK)  │◄──────│ id_rol (PK)      │◄──────│ id_permiso (PK)  │
+│ username         │       │ nombre_rol       │       │ id_rol (FK)      │
+│ password_hash    │       │ descripcion      │       │ accion           │
+│ email            │       └──────────────────┘       │ tabla_afectada   │
+│ huella_hash      │                                  └──────────────────┘
+│ rol (FK)         │
+│ activo           │
+│ fecha_registro   │
+│ ultimo_login     │
+└────────┬─────────┘
+         │
+         │ (1 a muchos)
+         │
+         ▼
+┌──────────────────┐
+│   login_log      │
+├──────────────────┤
+│ id_login (PK)    │
+│ id_usuario (FK)  │
+│ fecha_hora       │
+│ ip_address       │
+│ tipo_auth        │  -- 'password' o 'biometrico'
+│ exitoso          │
+└──────────────────┘
 
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              POZOS Y UBICACIÓN                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              POZOS (DATOS PRINCIPALES)                          │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────┐
-│        pozos            │
-├─────────────────────────┤
-│ id_pozo (PK)            │◄────┐
-│ orden                   │     │
-│ rec_id                  │     │
-│ hole_id (UNIQUE)        │     │ (Formato: LETRAS-NUMEROS, ej: LEK-0325)
-│ este                    │     │
-│ norte                   │     │
-│ cota                    │     │
-│ length                  │     │
-│ target                  │     │
-│ az                        │     │
-│ dip                     │     │
-│ plataforma              │     │
-│ tipo_ubicacion          │     │ (Underground, Surface)
-│ mina                    │     │
-│ estado                  │     │ (planificado, en_perforacion, completado)
-│ id_geologo_responsable  │     │ (FK a usuarios)
-│ id_perforista           │     │ (FK a usuarios)
-│ id_ingeniero_geo        │     │ (FK a usuarios)
-│ fecha_inicio_perf       │     │
-│ fecha_fin_perf          │     │
-│ created_at              │     │
-│ updated_at              │     │
-└────────────┬────────────┘     │
-             │                  │
-             │ (1 a muchos)     │
-             │                  │
-             ├──────────────────┼──────────────────┬──────────────────┐
-             │                  │                  │                  │
-             ▼                  ▼                  ▼                  ▼
-┌──────────────────┐  ┌─────────────────┐  ┌──────────────┐  ┌──────────────┐
-│hole_id_ediciones │  │  observaciones  │  │archivos_adjun│  │  riesgos     │
-├──────────────────┤  ├─────────────────┤  ├──────────────┤  ├──────────────┤
-│ id_edicion (PK)  │  │ id_obs (PK)     │  │ id_arch(PK)  │  │ id_riesgo(PK)│
-│ id_pozo (FK)     │  │ id_pozo (FK)    │  │ id_pozo (FK) │  │ id_pozo (FK) │
-│ hole_id_anterior │  │ tipo_observacion│  │ tipo_archivo │  │ nivel_riesgo │
-│ hole_id_nuevo    │  │ (geotecnica,    │  │ (planta,     │  │ (rojo,       │
-│ editado_por (FK) │  │  perforacion,   │  │  seccion,    │  │  amarillo,   │
-│ fecha_edicion    │  │  litologia,     │  │  geotecnia,  │  │  verde)      │
-│ numero_edicion   │  │  survey)        │  │  survey,     │  │ descripcion  │
-│ (1,2,3 o 4)      │  │ texto           │  │  litologia,  │  │ id_usuario   │
-└──────────────────┘  │ id_usuario (FK) │  │  observacion)│  │ fecha_registro│
-                      │ fecha_registro  │  │ ruta_archivo │  └──────────────┘
-                      └─────────────────┘  │ id_usuario   │
-                                           │ fecha_subida │
-                                           └──────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                  pozos                                       │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id_pozo (PK)                                                                 │
+│ orden                                                                        │
+│ rec_id                                                                       │
+│ hole_id (UNIQUE)                                                             │
+│ este                                                                         │
+│ norte                                                                        │
+│ cota                                                                         │
+│ length                                                                       │
+│ target                                                                       │
+│ az                                                                           │
+│ dip                                                                          │
+│ plataforma                                                                   │
+│ mina                                                                         │
+│ tipo_ubicacion (ENUM: 'Underground', 'Surface')                             │
+│ estado (ENUM: 'planificado','en_perforacion','completado','suspendido')     │
+│ id_geologo_creador (FK → usuarios)                                          │
+│ id_perforista_asignado (FK → usuarios)                                      │
+│ id_geotecnico_asignado (FK → usuarios)                                      │
+│ fecha_creacion                                                               │
+│ fecha_inicio_perforacion                                                     │
+│ fecha_fin_perforacion                                                        │
+│ perforacion_finalizada (BOOLEAN)                                             │
+│ ediciones_hole_id_restantes (DEFAULT 4)                                      │
+└──────────┬───────────────────────────────────────────────────────────────────┘
+           │
+           │ (1 a muchos)
+           │
+           ├──────────────────────────────────────────────────────────────┐
+           │                          │                │                 │
+           ▼                          ▼                ▼                 ▼
+┌────────────────────┐  ┌──────────────────┐  ┌──────────────┐  ┌──────────────┐
+│  auditoria_pozos   │  │ observaciones_   │  │  problemas   │  │   riesgos    │
+├────────────────────┤  │   perforista     │  │   pozo       │  │   pozo       │
+│ id_auditoria (PK)  │  ├──────────────────┤  ├──────────────┤  ├──────────────┤
+│ id_pozo (FK)       │  │ id_obs (PK)      │  │ id_prob (PK) │  │ id_riesgo(PK)│
+│ id_usuario (FK)    │  │ id_pozo (FK)     │  │ id_pozo (FK) │  │ id_pozo (FK) │
+│ campo_modificado   │  │ id_usuario (FK)  │  │ id_usuario   │  │ id_usuario   │
+│ valor_anterior     │  │ fecha_hora       │  │ (FK)         │  │ (FK)         │
+│ valor_nuevo        │  │ profundidad      │  │ fecha_hora   │  │ fecha_hora   │
+│ fecha_hora         │  │ descripcion      │  │ descripcion  │  │ descripcion  │
+│ ip_address         │  │ tipo (ENUM:      │  │ tipo_falla   │  │ nivel_semaforo│
+└────────────────────┘  │  'corte_veta',   │  │ acciones     │  │ (ENUM:       │
+                        │  'corte_estéril')│  │ tomados      │  │ 'verde',     │
+                        └──────────────────┘  │ resueltas    │  │ 'amarillo',  │
+                                              │ (BOOLEAN)    │  │ 'rojo')      │
+                                              └──────────────┘  └──────────────┘
 
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    DATOS TÉCNICOS (GEOTECNIA, SURVEY, LITOLOGÍA)           │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              ARCHIVOS Y DATOS ADICIONALES                       │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────┐
-│   datos_geotecnicos     │
-├─────────────────────────┤
-│ id_geotecnia (PK)       │
-│ id_pozo (FK)            │
-│ profundidad_m           │
-│ rqd_pct                 │
-│ rfr                     │
-│ fracturamiento          │
-│ agua_presente           │
-│ observaciones           │
-│ id_usuario_subio (FK)   │
-│ fecha_subida            │
-│ archivo_origen_csv      │
-└─────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            archivos_adjuntos                                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id_archivo (PK)                                                              │
+│ id_pozo (FK)                                                                 │
+│ id_usuario_subio (FK → usuarios)                                            │
+│ tipo_archivo (ENUM: 'planta','seccion','geotecnia','survey','litologia')    │
+│ nombre_archivo                                                               │
+│ ruta_archivo                                                                 │
+│ formato (ENUM: 'pdf','jpg','jpeg','png','tiff','raw','mpeg','mp4','csv')    │
+│ fecha_subida                                                                 │
+│ descripcion                                                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────┐
-│     datos_survey        │
-├─────────────────────────┤
-│ id_survey (PK)          │
-│ id_pozo (FK)            │
-│ profundidad_m           │
-│ azimuth                 │
-│ dip                     │
-│ desviacion_horizontal   │
-│ desviacion_vertical     │
-│ id_usuario_subio (FK)   │
-│ fecha_subida            │
-│ archivo_origen_csv      │
-└─────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            datos_geotecnicos                                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id_geotecnia (PK)                                                            │
+│ id_pozo (FK)                                                                 │
+│ id_usuario_subio (FK → usuarios)                                            │
+│ fecha_subida                                                                 │
+│ archivo_origen                                                               │
+│ datos_json (JSON)  -- Contiene todos los datos del CSV                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            datos_survey                                      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id_survey (PK)                                                               │
+│ id_pozo (FK)                                                                 │
+│ id_usuario_subio (FK → usuarios)                                            │
+│ fecha_subida                                                                 │
+│ profundidad_from                                                             │
+│ profundidad_to                                                               │
+│ desviacion_azimut                                                            │
+│ desviacion_dip                                                               │
+│ archivo_origen                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────┐
 │    datos_litologicos    │
@@ -285,116 +290,136 @@ Frontend: Mobile/Hybrid application with support for camera (plan scanning) and 
 
 COMPLETE ENTITY-RELATIONSHIP DIAGRAM
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              USUARIOS Y PERMISOS                            │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              USUARIOS Y PERMISOS                                │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────┐
-│    usuarios     │
-├─────────────────┤
-│ id_usuario (PK) │◄────┐
-│ username        │     │
-│ password_hash   │     │
-│ email           │     │
-│ rol             │     │ (geologo_admin, perforista, ingeniero_geotecnico)
-│ nombre_completo │     │
-│ biometrico_hash │     │
-│ activo          │     │
-│ created_at      │     │
-└────────┬────────┘     │
-         │              │
-         │ (1 a muchos) │
-         │              │
-         ▼              │
-┌─────────────────┐     │
-│  auditoria_logs │     │
-├─────────────────┤     │
-│ id_log (PK)     │     │
-│ id_usuario (FK) │─────┘
-│ tabla_afectada  │
-│ registro_id     │
-│ accion          │ (INSERT, UPDATE, DELETE)
-│ campo_modificado│
-│ valor_anterior  │
-│ valor_nuevo     │
-│ ip_address      │
-│ timestamp       │
-└─────────────────┘
+┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐
+│     usuarios     │       │  roles_usuario   │       │  permisos_rol    │
+├──────────────────┤       ├──────────────────┤       ├──────────────────┤
+│ id_usuario (PK)  │◄──────│ id_rol (PK)      │◄──────│ id_permiso (PK)  │
+│ username         │       │ nombre_rol       │       │ id_rol (FK)      │
+│ password_hash    │       │ descripcion      │       │ accion           │
+│ email            │       └──────────────────┘       │ tabla_afectada   │
+│ huella_hash      │                                  └──────────────────┘
+│ rol (FK)         │
+│ activo           │
+│ fecha_registro   │
+│ ultimo_login     │
+└────────┬─────────┘
+         │
+         │ (1 a muchos)
+         │
+         ▼
+┌──────────────────┐
+│   login_log      │
+├──────────────────┤
+│ id_login (PK)    │
+│ id_usuario (FK)  │
+│ fecha_hora       │
+│ ip_address       │
+│ tipo_auth        │  -- 'password' o 'biometrico'
+│ exitoso          │
+└──────────────────┘
 
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              POZOS Y UBICACIÓN                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              POZOS (DATOS PRINCIPALES)                          │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────┐
-│        pozos            │
-├─────────────────────────┤
-│ id_pozo (PK)            │◄────┐
-│ orden                   │     │
-│ rec_id                  │     │
-│ hole_id (UNIQUE)        │     │ (Formato: LETRAS-NUMEROS, ej: LEK-0325)
-│ este                    │     │
-│ norte                   │     │
-│ cota                    │     │
-│ length                  │     │
-│ target                  │     │
-│ az                        │     │
-│ dip                     │     │
-│ plataforma              │     │
-│ tipo_ubicacion          │     │ (Underground, Surface)
-│ mina                    │     │
-│ estado                  │     │ (planificado, en_perforacion, completado)
-│ id_geologo_responsable  │     │ (FK a usuarios)
-│ id_perforista           │     │ (FK a usuarios)
-│ id_ingeniero_geo        │     │ (FK a usuarios)
-│ fecha_inicio_perf       │     │
-│ fecha_fin_perf          │     │
-│ created_at              │     │
-│ updated_at              │     │
-└────────────┬────────────┘     │
-             │                  │
-             │ (1 a muchos)     │
-             │                  │
-             ├──────────────────┼──────────────────┬──────────────────┐
-             │                  │                  │                  │
-             ▼                  ▼                  ▼                  ▼
-┌──────────────────┐  ┌─────────────────┐  ┌──────────────┐  ┌──────────────┐
-│hole_id_ediciones │  │  observaciones  │  │archivos_adjun│  │  riesgos     │
-├──────────────────┤  ├─────────────────┤  ├──────────────┤  ├──────────────┤
-│ id_edicion (PK)  │  │ id_obs (PK)     │  │ id_arch(PK)  │  │ id_riesgo(PK)│
-│ id_pozo (FK)     │  │ id_pozo (FK)    │  │ id_pozo (FK) │  │ id_pozo (FK) │
-│ hole_id_anterior │  │ tipo_observacion│  │ tipo_archivo │  │ nivel_riesgo │
-│ hole_id_nuevo    │  │ (geotecnica,    │  │ (planta,     │  │ (rojo,       │
-│ editado_por (FK) │  │  perforacion,   │  │  seccion,    │  │  amarillo,   │
-│ fecha_edicion    │  │  litologia,     │  │  geotecnia,  │  │  verde)      │
-│ numero_edicion   │  │  survey)        │  │  survey,     │  │ descripcion  │
-│ (1,2,3 o 4)      │  │ texto           │  │  litologia,  │  │ id_usuario   │
-└──────────────────┘  │ id_usuario (FK) │  │  observacion)│  │ fecha_registro│
-                      │ fecha_registro  │  │ ruta_archivo │  └──────────────┘
-                      └─────────────────┘  │ id_usuario   │
-                                           │ fecha_subida │
-                                           └──────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                  pozos                                       │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id_pozo (PK)                                                                 │
+│ orden                                                                        │
+│ rec_id                                                                       │
+│ hole_id (UNIQUE)                                                             │
+│ este                                                                         │
+│ norte                                                                        │
+│ cota                                                                         │
+│ length                                                                       │
+│ target                                                                       │
+│ az                                                                           │
+│ dip                                                                          │
+│ plataforma                                                                   │
+│ mina                                                                         │
+│ tipo_ubicacion (ENUM: 'Underground', 'Surface')                             │
+│ estado (ENUM: 'planificado','en_perforacion','completado','suspendido')     │
+│ id_geologo_creador (FK → usuarios)                                          │
+│ id_perforista_asignado (FK → usuarios)                                      │
+│ id_geotecnico_asignado (FK → usuarios)                                      │
+│ fecha_creacion                                                               │
+│ fecha_inicio_perforacion                                                     │
+│ fecha_fin_perforacion                                                        │
+│ perforacion_finalizada (BOOLEAN)                                             │
+│ ediciones_hole_id_restantes (DEFAULT 4)                                      │
+└──────────┬───────────────────────────────────────────────────────────────────┘
+           │
+           │ (1 a muchos)
+           │
+           ├──────────────────────────────────────────────────────────────┐
+           │                          │                │                 │
+           ▼                          ▼                ▼                 ▼
+┌────────────────────┐  ┌──────────────────┐  ┌──────────────┐  ┌──────────────┐
+│  auditoria_pozos   │  │ observaciones_   │  │  problemas   │  │   riesgos    │
+├────────────────────┤  │   perforista     │  │   pozo       │  │   pozo       │
+│ id_auditoria (PK)  │  ├──────────────────┤  ├──────────────┤  ├──────────────┤
+│ id_pozo (FK)       │  │ id_obs (PK)      │  │ id_prob (PK) │  │ id_riesgo(PK)│
+│ id_usuario (FK)    │  │ id_pozo (FK)     │  │ id_pozo (FK) │  │ id_pozo (FK) │
+│ campo_modificado   │  │ id_usuario (FK)  │  │ id_usuario   │  │ id_usuario   │
+│ valor_anterior     │  │ fecha_hora       │  │ (FK)         │  │ (FK)         │
+│ valor_nuevo        │  │ profundidad      │  │ fecha_hora   │  │ fecha_hora   │
+│ fecha_hora         │  │ descripcion      │  │ descripcion  │  │ descripcion  │
+│ ip_address         │  │ tipo (ENUM:      │  │ tipo_falla   │  │ nivel_semaforo│
+└────────────────────┘  │  'corte_veta',   │  │ acciones     │  │ (ENUM:       │
+                        │  'corte_estéril')│  │ tomados      │  │ 'verde',     │
+                        └──────────────────┘  │ resueltas    │  │ 'amarillo',  │
+                                              │ (BOOLEAN)    │  │ 'rojo')      │
+                                              └──────────────┘  └──────────────┘
 
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    DATOS TÉCNICOS (GEOTECNIA, SURVEY, LITOLOGÍA)           │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              ARCHIVOS Y DATOS ADICIONALES                       │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────┐
-│   datos_geotecnicos     │
-├─────────────────────────┤
-│ id_geotecnia (PK)       │
-│ id_pozo (FK)            │
-│ profundidad_m           │
-│ rqd_pct                 │
-│ rfr                     │
-│ fracturamiento          │
-│ agua_presente           │
-│ observaciones           │
-│ id_usuario_subio (FK)   │
-│ fecha_subida            │
-│ archivo_origen_csv      │
-└─────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            archivos_adjuntos                                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id_archivo (PK)                                                              │
+│ id_pozo (FK)                                                                 │
+│ id_usuario_subio (FK → usuarios)                                            │
+│ tipo_archivo (ENUM: 'planta','seccion','geotecnia','survey','litologia')    │
+│ nombre_archivo                                                               │
+│ ruta_archivo                                                                 │
+│ formato (ENUM: 'pdf','jpg','jpeg','png','tiff','raw','mpeg','mp4','csv')    │
+│ fecha_subida                                                                 │
+│ descripcion                                                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            datos_geotecnicos                                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id_geotecnia (PK)                                                            │
+│ id_pozo (FK)                                                                 │
+│ id_usuario_subio (FK → usuarios)                                            │
+│ fecha_subida                                                                 │
+│ archivo_origen                                                               │
+│ datos_json (JSON)  -- Contiene todos los datos del CSV                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            datos_survey                                      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id_survey (PK)                                                               │
+│ id_pozo (FK)                                                                 │
+│ id_usuario_subio (FK → usuarios)                                            │
+│ fecha_subida                                                                 │
+│ profundidad_from                                                             │
+│ profundidad_to                                                               │
+│ desviacion_azimut                                                            │
+│ desviacion_dip                                                               │
+│ archivo_origen                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────┐
 │     datos_survey        │
