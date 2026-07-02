@@ -210,3 +210,7 @@ def cargar_csv_geotecnia(db, ruta_csv, id_pozo, id_usuario):
     )
     db.add(nuevo_registro)
     db.commit()
+
+3. Biométrico (Huella Dactilar):
+Para la huella, no guardes la imagen. Usa una librería como python-fingerprint o el SDK del fabricante del lector (ej. DigitalPersona) para extraer el template (un hash o array de bytes) y guárdalo en la columna huella_hash. Al iniciar sesión, comparas el template escaneado con el guardado en la DB.
+Con esta estructura, tu compañero podrá diseñar la interfaz gráfica (PyQt/Tkinter) sabiendo exactamente qué objetos de Python llamar para mostrar y guardar la información. 
