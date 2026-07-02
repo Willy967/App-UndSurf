@@ -194,6 +194,45 @@ DIAGRAMA ENTIDAD-RELACIÓN COMPLETO
 │ fecha_subida            │
 │ archivo_origen_csv      │
 └─────────────────────────┘
+📱 FLUJO DE LA APLICACIÓN
+
+┌─────────────────────────────────────────────────────────────┐
+│                    PANTALLA DE LOGIN                        │
+│  [Usuario] [Contraseña]  o  [🔒 Biométrico]                │
+│  ¿Olvidó su contraseña? [Recuperar por email]              │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    PANTALLA DE INICIO                       │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 🔴 LEK-0325 - En perforación - Riesgo ALTO         │   │
+│  │ 🟡 LEK-0326 - En perforación - Riesgo MEDIO        │   │
+│  │ 🟢 LEK-0327 - En perforación - Riesgo BAJO         │   │
+│  │ ⚪ LEK-0328 - Planificado                           │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  [🔍 Buscar]  [➕ Nuevo Pozo]  [📊 Reportes]               │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    DETALLE DEL POZO                         │
+│  HOLE_ID: LEK-0325  [Editar] (solo si tiene permisos)      │
+│  Ubicación: GTW 554 - Underground                           │
+│  Estado: En perforación                                     │
+│                                                             │
+│  [📋 Datos] [📝 Observaciones] [📎 Archivos] [⚠️ Riesgos]  │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 📋 DATOS DE PERFORACIÓN (del CSV)                  │   │
+│  │ Este: 2394067.33  Norte: 4808282.14  Cota: 559     │   │
+│  │ Length: 125  AZ: 42  DIP: -47                       │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 📎 ARCHIVOS ADJUNTOS                                │   │
+│  │ [📄 Planta.pdf] [📄 Seccion.jpg] [📄 Geotecnia.csv]│   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
 
 🌍 English
 Overview
@@ -388,3 +427,42 @@ COMPLETE ENTITY-RELATIONSHIP DIAGRAM
 │ fecha_subida            │
 │ archivo_origen_csv      │
 └─────────────────────────┘
+FLOW APP
+
+┌─────────────────────────────────────────────────────────────┐
+│                    PANTALLA DE LOGIN                        │
+│  [Usuario] [Contraseña]  o  [🔒 Biométrico]                │
+│  ¿Olvidó su contraseña? [Recuperar por email]              │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    PANTALLA DE INICIO                       │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 🔴 LEK-0325 - En perforación - Riesgo ALTO         │   │
+│  │ 🟡 LEK-0326 - En perforación - Riesgo MEDIO        │   │
+│  │ 🟢 LEK-0327 - En perforación - Riesgo BAJO         │   │
+│  │ ⚪ LEK-0328 - Planificado                           │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  [🔍 Buscar]  [➕ Nuevo Pozo]  [📊 Reportes]               │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    DETALLE DEL POZO                         │
+│  HOLE_ID: LEK-0325  [Editar] (solo si tiene permisos)      │
+│  Ubicación: GTW 554 - Underground                           │
+│  Estado: En perforación                                     │
+│                                                             │
+│  [📋 Datos] [📝 Observaciones] [📎 Archivos] [⚠️ Riesgos]  │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 📋 DATOS DE PERFORACIÓN (del CSV)                  │   │
+│  │ Este: 2394067.33  Norte: 4808282.14  Cota: 559     │   │
+│  │ Length: 125  AZ: 42  DIP: -47                       │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 📎 ARCHIVOS ADJUNTOS                                │   │
+│  │ [📄 Planta.pdf] [📄 Seccion.jpg] [📄 Geotecnia.csv]│   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
