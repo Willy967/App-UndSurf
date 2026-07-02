@@ -39,9 +39,9 @@ Ingenieros Geotécnicos.
 | :--- | :---: | :---: | :---: |
 | **Cargar CSV inicial y Planos Visuales** | ✅ Sí | ❌ No | ❌ No |
 | **Editar `HOLE_ID` (Ilimitado)** | ✅ Sí | ❌ Limitado (Máx. 3 edits)* | ❌ No |
-| **Modificar Avance de Perforación** | ❌ No | ✅ Sí | ❌ No |
-| **Registrar Observaciones (Veta/Estéril)** | ❌ No | ✅ Sí | ❌ No |
-| **Registrar Problemas de Perforación** | ❌ No | ✅ Sí | ❌ No |
+| **Modificar Avance de Perforación** | ✅ Sí | ✅ Sí | ❌ No |
+| **Registrar Observaciones (Veta/Estéril)** | ✅ Sí | ✅ Sí | ❌ No |
+| **Registrar Problemas de Perforación** | ✅ Sí | ✅ Sí | ❌ No |
 | **Subir CSVs Geotécnicos y Riesgos Coloreados** | ✅ Sí | ❌ No | ✅ Sí (Solo Lectura + Añadir Riesgos) |
 | **Subir Datos Finales (Survey, Geotecnia, Litología)** | ✅ Sí | ✅ Limitado | ❌ No |
 | **Acceso (Solo Lectura)** | ✅ Sí | ✅ Sí | ✅ Sí |
@@ -56,7 +56,7 @@ Para garantizar la integridad de los datos, **Undsurf** aplica reglas de validac
 1.  **Unicidad:** El sistema valida que cada nuevo `HOLE_ID` no exista ya en la base de datos. Si existe, se muestra una
 alerta: *"Este HOLE_ID ya existe en la base de datos"*.
 2.  **Formato:** El `HOLE_ID` solo acepta **letras MAYÚSCULAS**.
-3.  **Bloqueo:** Una vez que un pozo comienza su ejecución con un `HOLE_ID` específico, este se **bloquea**.
+3.  **Bloqueo:** Una vez que un pozo finaliza su ejecución con un `HOLE_ID` específico, este se **bloquea**.
     - El Perforista no puede modificarlo sin solicitar permiso.
     - Solo el **Geólogo (Admin)** puede desbloquearlo y editarlo.
 4.  **Estado Final:** Una vez que un pozo se marca como **"Terminado"**, el `HOLE_ID` queda bloqueado de forma permanente.
@@ -309,9 +309,9 @@ schedule, the Driller executes and logs progress, and other professionals (Geote
 | :--- | :---: | :---: | :---: |
 | **Upload initial CSV & Visual Plans** | ✅ Yes | ❌ No | ❌ No |
 | **Edit `HOLE_ID` (Unlimited)** | ✅ Yes | ❌ Limited (Max 3 edits)* | ❌ No |
-| **Modify Drilling Progress (Advance)** | ❌ No | ✅ Yes | ❌ No |
-| **Log Observations (Vein/Waste depths)** | ❌ No | ✅ Yes | ❌ No |
-| **Log Drilling Problems (Water loss, Faults)** | ❌ No | ✅ Yes | ❌ No |
+| **Modify Drilling Progress (Advance)** | ✅ Yes | ✅ Yes | ❌ No |
+| **Log Observations (Vein/Waste depths)** | ✅ Yes | ✅ Yes | ❌ No |
+| **Log Drilling Problems (Water loss, Faults)** | ✅ Yes | ✅ Yes | ❌ No |
 | **Add Geotechnical CSVs & Color-Coded Risks** | ✅ Yes | ❌ No | ✅ Yes (Read-Only + Add Risks) |
 | **Upload Final Data (Survey, Geotech, Lithology)** | ✅ Yes | ✅ Limited | ❌ No |
 | **Access (Read-Only View)** | ✅ Yes | ✅ Yes | ✅ Yes |
@@ -326,7 +326,7 @@ To ensure data integrity, **Undsurf** enforces strict validation rules for the `
 1.  **Uniqueness:** The system validates that every new `HOLE_ID` does not already exist in the database. If it
 does, an alert is displayed: *"This HOLE_ID already exists in the database"*.
 2.  **Format:** The `HOLE_ID` only accepts **UPPERCASE letters**.
-3.  **Locked State:** Once a drill hole begins execution with a specific `HOLE_ID`, it becomes **locked**. 
+3.  **Locked State:** Once a drill hole finish execution with a specific `HOLE_ID`, it becomes **locked**. 
     - The Driller cannot modify it without requesting permission.
     - Only the **Geologist (Admin)** can unlock and edit it.
 4.  **Final State:** Once a drill hole is marked as **"Finished"**, the `HOLE_ID` is permanently locked. No further
