@@ -11,18 +11,27 @@ App para gestión de pozos en mina subterránea y superficie. Util para transmit
 </p>
 # Undsurf - Sistema de Gestión de Datos de Perforación Minera
 
-**Undsurf** es una aplicación integral de gestión operativa diseñada para agilizar el flujo de comunicación entre geólogos, perforistas e ingenieros de minas en minas subterráneas y a cielo abierto.
+**Undsurf** es una aplicación integral de gestión operativa diseñada para agilizar el flujo de comunicación entre geólogos,
+ perforistas e ingenieros de minas en minas subterráneas y a cielo abierto.
 
-Reemplaza los formularios en papel por un flujo de trabajo digital en tiempo real. El Geólogo planifica el programa de perforación, el Perforista ejecuta y registra los avances, y otros profesionales (Ingeniero Geotécnico, Ingeniero de Minas) acceden a los datos validados al instante para la toma de decisiones en terreno.
+Reemplaza los formularios en papel por un flujo de trabajo digital en tiempo real. El Geólogo planifica el programa de perforación,
+ el Perforista ejecuta y registra los avances, y otros profesionales (Ingeniero Geotécnico, Ingeniero de Minas) acceden a los
+datos validados al instante para la toma de decisiones en terreno.
 
 ## 🚀 Características Principales
 
-- **Control de Acceso por Roles (RBAC):** Paneles y permisos personalizados para Geólogos (Administradores), Perforistas e Ingenieros Geotécnicos.
-- **Gestión Centralizada de Datos:** Carga y administración de datos de perforación mediante archivos CSV, con control estricto sobre los identificadores críticos.
-- **Mapeo Visual de Riesgos:** Carga de plantas y secciones (PDF, JPG, PNG) para marcar visualmente riesgos de infraestructura y peligros subterráneos.
-- **Autenticación Biométrica:** Inicio de sesión seguro mediante contraseña (primera vez) y reconocimiento de huella dactilar (sesiones posteriores).
-- **Buscador Avanzado:** Filtros múltiples por `HOLE_ID`, Ubicación, Mina, Perforista, Geólogo, Ingeniero Geotécnico, Fecha y Estado de Riesgo.
-- **Registro de Auditoría Completo:** Cada modificación realizada por cualquier usuario se registra con una marca de tiempo precisa (Fecha y Hora).
+- **Control de Acceso por Roles (RBAC):** Paneles y permisos personalizados para Geólogos (Administradores), Perforistas e
+Ingenieros Geotécnicos.
+- **Gestión Centralizada de Datos:** Carga y administración de datos de perforación mediante archivos CSV, con control
+ estricto sobre los identificadores críticos.
+- **Mapeo Visual de Riesgos:** Carga de plantas y secciones (PDF, JPG, PNG) para marcar visualmente riesgos de infraestructura
+ y peligros subterráneos.
+- **Autenticación Biométrica:** Inicio de sesión seguro mediante contraseña (primera vez) y reconocimiento de huella dactilar
+ (sesiones posteriores).
+- **Buscador Avanzado:** Filtros múltiples por `HOLE_ID`, Ubicación, Mina, Perforista, Geólogo, Ingeniero Geotécnico, Fecha y
+ Estado de Riesgo.
+- **Registro de Auditoría Completo:** Cada modificación realizada por cualquier usuario se registra con una marca de tiempo
+ precisa (Fecha y Hora).
 
 ## 👥 Roles de Usuario y Permisos
 
@@ -37,18 +46,21 @@ Reemplaza los formularios en papel por un flujo de trabajo digital en tiempo rea
 | **Subir Datos Finales (Survey, Geotecnia, Litología)** | ✅ Sí | ✅ Limitado | ❌ No |
 | **Acceso (Solo Lectura)** | ✅ Sí | ✅ Sí | ✅ Sí |
 
-> **\*Nota para Perforistas:** Solo pueden editar el `HOLE_ID` hasta 3 veces sin aprobación del administrador. Si superan este límite, deben solicitar permiso al Geólogo.
+> **\*Nota para Perforistas:** Solo pueden editar el `HOLE_ID` hasta 3 veces sin aprobación del administrador. Si superan
+este límite, deben solicitar permiso al Geólogo.
 
 ## 🔐 Reglas de Negocio Críticas (Gestión de HOLE_ID)
 
 Para garantizar la integridad de los datos, **Undsurf** aplica reglas de validación estrictas para la columna `HOLE_ID`:
 
-1.  **Unicidad:** El sistema valida que cada nuevo `HOLE_ID` no exista ya en la base de datos. Si existe, se muestra una alerta: *"Este HOLE_ID ya existe en la base de datos"*.
+1.  **Unicidad:** El sistema valida que cada nuevo `HOLE_ID` no exista ya en la base de datos. Si existe, se muestra una
+alerta: *"Este HOLE_ID ya existe en la base de datos"*.
 2.  **Formato:** El `HOLE_ID` solo acepta **letras MAYÚSCULAS**.
 3.  **Bloqueo:** Una vez que un pozo comienza su ejecución con un `HOLE_ID` específico, este se **bloquea**.
     - El Perforista no puede modificarlo sin solicitar permiso.
     - Solo el **Geólogo (Admin)** puede desbloquearlo y editarlo.
-4.  **Estado Final:** Una vez que un pozo se marca como **"Terminado"**, el `HOLE_ID` queda bloqueado de forma permanente. No se permiten más ediciones.
+4.  **Estado Final:** Una vez que un pozo se marca como **"Terminado"**, el `HOLE_ID` queda bloqueado de forma permanente.
+No se permiten más ediciones.
 
 ## 📂 Carga de Datos y Gestión de Archivos
 
@@ -87,7 +99,8 @@ Los usuarios pueden localizar rápidamente pozos específicos usando la barra de
 
 ## 🗄️ Modelo de Datos Conceptual (Relaciones)
 
-A continuación se muestra el diagrama de relaciones conceptuales para las tablas principales de la base de datos y las integraciones CSV:
+A continuación se muestra el diagrama de relaciones conceptuales para las tablas principales de la base de datos y
+las integraciones CSV:
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              USUARIOS Y AUTENTICACIÓN                        │
 ├─────────────────────────────────────────────────────────────────────────────┤
@@ -269,17 +282,25 @@ erDiagram
     }
 # Undsurf - Mine Drilling Data Management System
 
-**Undsurf** is a comprehensive operational management application designed to streamline the communication flow between geologists, drillers, and mining engineers in underground and surface mines.
+**Undsurf** is a comprehensive operational management application designed to streamline the communication flow
+ between geologists, drillers, and mining engineers in underground and surface mines.
 
-It replaces traditional paper-based forms with a digital, real-time workflow. The Geologist plans the drilling schedule, the Driller executes and logs progress, and other professionals (Geotechnical Engineers, Mining Engineers) access validated data instantly for on-site decision-making.
+It replaces traditional paper-based forms with a digital, real-time workflow. The Geologist plans the drilling
+schedule, the Driller executes and logs progress, and other professionals (Geotechnical Engineers, Mining Engineers)
+ access validated data instantly for on-site decision-making.
 
 ## 🚀 Core Features
 
-- **Role-Based Access Control (RBAC):** Customized dashboards and permissions for Geologists (Admins), Drillers, and Geotechnical Engineers.
-- **Centralized Data Management:** Upload and manage drilling data via CSV files, with strict control over critical identifiers.
-- **Visual Risk Mapping:** Upload plant layouts and section views (PDF, JPG, PNG) to visually mark infrastructure risks and underground hazards.
-- **Biometric Authentication:** Secure login using passwords (first time) and fingerprint recognition (subsequent sessions).
-- **Advanced Search Engine:** Multi-filter search by `HOLE_ID`, Location, Mine, Driller, Geologist, Geotechnical Engineer, Date, and Risk Status.
+- **Role-Based Access Control (RBAC):** Customized dashboards and permissions for Geologists (Admins), Drillers,
+ and Geotechnical Engineers.
+- **Centralized Data Management:** Upload and manage drilling data via CSV files, with strict control over critical
+ identifiers.
+- **Visual Risk Mapping:** Upload plant layouts and section views (PDF, JPG, PNG) to visually mark infrastructure
+ risks and underground hazards.
+- **Biometric Authentication:** Secure login using passwords (first time) and fingerprint recognition
+ (subsequent sessions).
+- **Advanced Search Engine:** Multi-filter search by `HOLE_ID`, Location, Mine, Driller, Geologist, Geotechnical
+ Engineer, Date, and Risk Status.
 - **Complete Audit Trail:** Every modification made by any user is logged with a precise timestamp (Date & Time).
 
 ## 👥 User Roles & Permissions
@@ -295,18 +316,21 @@ It replaces traditional paper-based forms with a digital, real-time workflow. Th
 | **Upload Final Data (Survey, Geotech, Lithology)** | ✅ Yes | ✅ Limited | ❌ No |
 | **Access (Read-Only View)** | ✅ Yes | ✅ Yes | ✅ Yes |
 
-> **\*Note for Drillers:** You can only edit the `HOLE_ID` up to 3 times without admin approval. If you exceed this limit, you must request permission from the Geologist.
+> **\*Note for Drillers:** You can only edit the `HOLE_ID` up to 3 times without admin approval. If you exceed
+this limit, you must request permission from the Geologist.
 
 ## 🔐 Critical Business Rules (HOLE_ID Management)
 
 To ensure data integrity, **Undsurf** enforces strict validation rules for the `HOLE_ID` column:
 
-1.  **Uniqueness:** The system validates that every new `HOLE_ID` does not already exist in the database. If it does, an alert is displayed: *"This HOLE_ID already exists in the database"*.
+1.  **Uniqueness:** The system validates that every new `HOLE_ID` does not already exist in the database. If it
+does, an alert is displayed: *"This HOLE_ID already exists in the database"*.
 2.  **Format:** The `HOLE_ID` only accepts **UPPERCASE letters**.
 3.  **Locked State:** Once a drill hole begins execution with a specific `HOLE_ID`, it becomes **locked**. 
     - The Driller cannot modify it without requesting permission.
     - Only the **Geologist (Admin)** can unlock and edit it.
-4.  **Final State:** Once a drill hole is marked as **"Finished"**, the `HOLE_ID` is permanently locked. No further edits are allowed.
+4.  **Final State:** Once a drill hole is marked as **"Finished"**, the `HOLE_ID` is permanently locked. No further
+edits are allowed.
 
 ## 📂 Data Uploads & File Management
 
